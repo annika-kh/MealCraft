@@ -1,0 +1,17 @@
+#BlueJ class context
+comment0.target=App
+comment1.params=stage
+comment1.target=void\ start(javafx.stage.Stage)
+comment2.params=
+comment2.target=void\ loadStarterData()
+comment3.params=
+comment3.target=void\ refreshInventory()
+comment4.params=item
+comment4.target=void\ showItemDetails(FoodItem)
+comment5.params=
+comment5.target=void\ showAddItemDialog()
+comment6.params=
+comment6.target=void\ showRemoveItemDialog()
+comment7.params=args
+comment7.target=void\ main(java.lang.String[])
+numComments=8

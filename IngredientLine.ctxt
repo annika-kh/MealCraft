@@ -1,0 +1,11 @@
+#BlueJ class context
+comment0.target=IngredientLine
+comment1.params=itemName\ itemAmount\ itemUnit
+comment1.target=IngredientLine(java.lang.String,\ double,\ java.lang.String)
+comment2.params=
+comment2.target=java.lang.String\ getName()
+comment3.params=
+comment3.target=double\ getAmount()
+comment4.params=
+comment4.target=java.lang.String\ getUnit()
+numComments=5

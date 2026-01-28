@@ -1,0 +1,25 @@
+#BlueJ class context
+comment0.target=Recipe
+comment1.params=name\ steps\ ingredients\ imgFilePath
+comment1.target=Recipe(java.lang.String,\ java.util.List,\ java.util.List,\ java.lang.String)
+comment10.params=fridge
+comment10.target=boolean\ canCook(Fridge)
+comment11.params=fridge
+comment11.target=java.util.List\ getMissingIngredients(Fridge)
+comment2.params=
+comment2.target=java.lang.String\ getName()
+comment3.params=
+comment3.target=java.util.List\ getSteps()
+comment4.params=
+comment4.target=java.util.List\ getIngredients()
+comment5.params=
+comment5.target=java.lang.String\ getImgFilePath()
+comment6.params=name
+comment6.target=void\ setName(java.lang.String)
+comment7.params=steps
+comment7.target=void\ setSteps(java.util.List)
+comment8.params=ingredients
+comment8.target=void\ setIngredients(java.util.List)
+comment9.params=imgFilePath
+comment9.target=void\ setImgFilePath(java.lang.String)
+numComments=12
