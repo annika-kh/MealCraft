@@ -1,4 +1,5 @@
 #BlueJ package file
+<<<<<<< HEAD
 dependency1.from=FoodItem
 dependency1.to=Category
 dependency1.type=UsesDependency
@@ -39,11 +40,18 @@ editor.fx.0.height=853
 editor.fx.0.width=744
 editor.fx.0.x=760
 editor.fx.0.y=46
+=======
+editor.fx.0.height=0
+editor.fx.0.width=0
+editor.fx.0.x=0
+editor.fx.0.y=0
+>>>>>>> 73999ed (Initial sharing of project)
 objectbench.height=100
 objectbench.width=776
 package.divider.horizontal=0.6
 package.divider.vertical=0.8003731343283582
 package.editor.height=422
+<<<<<<< HEAD
 package.editor.width=663
 package.editor.x=677
 package.editor.y=137
@@ -51,6 +59,15 @@ package.frame.height=600
 package.frame.width=800
 package.numDependencies=12
 package.numTargets=7
+=======
+package.editor.width=684
+package.editor.x=712
+package.editor.y=66
+package.frame.height=600
+package.frame.width=800
+package.numDependencies=0
+package.numTargets=0
+>>>>>>> 73999ed (Initial sharing of project)
 package.showExtends=true
 package.showUses=true
 project.charset=UTF-8
@@ -59,6 +76,7 @@ readme.name=@README
 readme.width=48
 readme.x=10
 readme.y=10
+<<<<<<< HEAD
 target1.height=70
 target1.name=App
 target1.showInterface=false
@@ -108,3 +126,5 @@ target7.type=ClassTarget
 target7.width=120
 target7.x=10
 target7.y=170
+=======
+>>>>>>> 73999ed (Initial sharing of project)
