@@ -137,4 +137,20 @@ public class Fridge {
         }
         return soon;
     }
+    
+    public List<FoodItem> getAllFoodItemsSortedAZ() {
+        List<FoodItem> items = new ArrayList<>(inventoryByName.values());
+        items.sort(Comparator.comparing(FoodItem::getNormalizedName));
+        return items;
+    }
+
+    public List<FoodItem> getLowStockItems(double threshold) {
+        List<FoodItem> low = new ArrayList<>();
+        for (FoodItem item : inventoryByName.values()) {
+            if (item.getQuantity() <= threshold) {
+                low.add(item);
+            }
+        }
+        return low;
+    }
 }

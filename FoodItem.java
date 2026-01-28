@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 public class FoodItem{
     // Instance Variables
@@ -63,5 +64,28 @@ public class FoodItem{
     }
     public void setImgFilePath(String newImgFilePath){
         imgFilePath = newImgFilePath;
+    }
+    
+    // Adds to the current quantity (ignores negative/zero)
+    public void addQuantity(double amt) {
+        if (amt <= 0) return;
+        quantity += amt;
+    }
+    
+    // Subtracts quantity if possible.
+    // Returns true if subtraction happened, false if invalid or not enough.
+    public boolean subtractQuantity(double amt) {
+        if (amt <= 0) return false;
+        if (amt > quantity) return false;
+    
+        quantity -= amt;
+
+        return true;
+    }
+    
+    // Number of days until expiration (0 = expires today, negative = already expired)
+    public long daysUntilExpiration(LocalDate today) {
+        if (today == null) today = LocalDate.now();
+        return ChronoUnit.DAYS.between(today, expirationDate);
     }
 }

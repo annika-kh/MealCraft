@@ -53,6 +53,19 @@ public class Recipe {
         }
         return true;
     }
+    
+    // Consumes ingredients from the fridge (all-or-nothing).
+    // Returns true if cooked successfully; false if not cookable.
+    public boolean cook(Fridge fridge) {
+        if (!canCook(fridge)) return false;
+    
+        // Remove required quantities
+        for (IngredientLine line : ingredients) {
+            fridge.removeFood(line.getName(), line.getAmount());
+        }
+    
+        return true;
+    }
 
     // Returns missing ingredients (by name) if not cookable
     public List<String> getMissingIngredients(Fridge fridge) {
