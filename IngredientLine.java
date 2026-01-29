@@ -1,23 +1,34 @@
+/**
+ * Represents a single ingredient in a recipe.
+ */
 public class IngredientLine {
-    // Instance Variables
-    private String name;
+    /** normalized name */
+    private String normalizedName;
+    /** required amount */
     private double amount;
+    /** unit */
     private String unit;
-
-    // Constructor
+    
+    /**
+     * Creates an ingredient line.
+     */
     public IngredientLine(String itemName, double itemAmount, String itemUnit) {
-        this.name = itemName.toLowerCase().trim();
-        this.amount = itemAmount;
-        this.unit = itemUnit;
+        normalizedName = itemName.toLowerCase().trim();
+        amount = itemAmount;
+        unit = itemUnit;
     }
     
-    // Getter Methods
-    public String getName() {
-        return name;
+    /** @return normalized name */
+    public String getNormalizedName() {
+        return normalizedName;
     }
+    
+    /** @return amount */
     public double getAmount() {
         return amount;
     }
+    
+    /** @return unit */
     public String getUnit() {
         return unit;
     }

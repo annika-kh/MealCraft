@@ -1,11 +1,16 @@
 #BlueJ class context
 comment0.target=IngredientLine
+comment0.text=\n\ Represents\ a\ single\ ingredient\ in\ a\ recipe.\n
 comment1.params=itemName\ itemAmount\ itemUnit
 comment1.target=IngredientLine(java.lang.String,\ double,\ java.lang.String)
+comment1.text=\n\ Creates\ an\ ingredient\ line.\n
 comment2.params=
-comment2.target=java.lang.String\ getName()
+comment2.target=java.lang.String\ getNormalizedName()
+comment2.text=@return\ normalized\ name
 comment3.params=
 comment3.target=double\ getAmount()
+comment3.text=@return\ amount
 comment4.params=
 comment4.target=java.lang.String\ getUnit()
+comment4.text=@return\ unit
 numComments=5

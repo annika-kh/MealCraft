@@ -1,14 +1,18 @@
-import java.util.ArrayList;
 import java.util.List;
 
 public class Recipe {
-    // Instance Variables
+    /** recipe name */
     private String name;
+    /** cooking steps */
     private List<String> steps;
+    /** ingredient list */
     private List<IngredientLine> ingredients;
+    /** image path */
     private String imgFilePath;
 
-    // Constructor
+    /**
+     * Creates a recipe. 
+     */
     public Recipe (String name, List<String> steps, List<IngredientLine> ingredients, String imgFilePath) {
         this.name = name;
         this.steps = steps;
@@ -16,66 +20,54 @@ public class Recipe {
         this.imgFilePath = imgFilePath;
     }
 
-    // Getter Methods
+    /** @return recipe name */
     public String getName() {
         return name;
     }
+    
+    /** @return steps lists */
     public List<String> getSteps() {
         return steps;
     }
+    
+    /** @return ingredients */
     public List<IngredientLine> getIngredients() {
         return ingredients;
     }
+    
+    /** @return recipe image path */
     public String getImgFilePath() {
         return imgFilePath;
     }
 
-    // Setter Methods
-    public void setName(String name) {
-        this.name = name;
-    }
-    public void setSteps(List<String> steps) {
-        this.steps = steps;
-    }
-    public void setIngredients(List<IngredientLine> ingredients) {
-        this.ingredients = ingredients;
-    }
-    public void setImgFilePath(String imgFilePath) {
-        this.imgFilePath = imgFilePath;
-    }
-
-    // Returns true if the fridge contains all required ingredients (by name)
+    /**
+     * Checks if a recipe can be cooked.
+     * 
+     * @param fridge
+     * @return true if possible
+     */
     public boolean canCook(Fridge fridge) {
         for (IngredientLine line : ingredients) {
-            if (fridge.getFoodItem(line.getName()) == null) {
+            FoodItem item = fridge.getFoodItem(line.getNormalizedName());
+            if (item == null || item.getQuantity() < line.getAmount()) {
                 return false;
             }
         }
         return true;
     }
     
-    // Consumes ingredients from the fridge (all-or-nothing).
-    // Returns true if cooked successfully; false if not cookable.
+    /**
+     * Consumes ingredients from fridge.
+     */
     public boolean cook(Fridge fridge) {
-        if (!canCook(fridge)) return false;
-    
-        // Remove required quantities
-        for (IngredientLine line : ingredients) {
-            fridge.removeFood(line.getName(), line.getAmount());
+        if (!canCook(fridge)) {
+            return false;
         }
-    
+        
+        for (IngredientLine line : ingredients) {
+            fridge.removeFood(line.getNormalizedName(), line.getAmount());
+        }
+        
         return true;
-    }
-
-    // Returns missing ingredients (by name) if not cookable
-    public List<String> getMissingIngredients(Fridge fridge) {
-        List<String> missing = new ArrayList<>();
-        for (IngredientLine line : ingredients) {
-            FoodItem item = fridge.getFoodItem(line.getName());
-            if (item == null) {
-                missing.add(line.getName());
-            }
-        }
-        return missing;
     }
 }

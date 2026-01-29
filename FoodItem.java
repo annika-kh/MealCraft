@@ -1,20 +1,31 @@
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Represents a food item stored in the fridge.
+ */
 public class FoodItem{
-    // Instance Variables
+    /** display name */
     private String name;
+    /** normalized name used as key */
     private String normalizedName;
+    /** quantity of the item */
     private double quantity;
+    /** unit label */
     private String unit;
+    /** category */
     private Category category;
+    /** expiration date */
     private LocalDate expirationDate;
+    /** image file path */
     private String imgFilePath;
 
-    // Constructor
-    public FoodItem(String name, double quantity, String unit, Category category, LocalDate expirationDate, String imgFilePath){
-        this.name = name;
-        normalizedName = name.toLowerCase().trim();
+    /**
+     * Creates a food item.
+     */
+    public FoodItem(String name, double quantity, String unit,Category category, LocalDate expirationDate, String imgFilePath) {
+        this.name = name.trim();
+        this.normalizedName = name.toLowerCase().trim();
         this.quantity = quantity;
         this.unit = unit;
         this.category = category;
@@ -22,70 +33,97 @@ public class FoodItem{
         this.imgFilePath = imgFilePath;
     }
 
-    // Getter Methods
-    public String getName(){
+    /** @return name */
+    public String getName() {
         return name;
     }
-    public String getNormalizedName(){
+    
+    /** @return normalized name */
+    public String getNormalizedName() {
         return normalizedName;
     }
-    public double getQuantity(){
+    
+    /** @return quantity */
+    public double getQuantity() {
         return quantity;
     }
-    public String getUnit(){
+    
+    /** @return unit */
+    public String getUnit() {
         return unit;
     }
-    public Category getCategory(){
+    
+    /** @return category */
+    public Category getCategory() {
         return category;
     }
-    public LocalDate getExpirationDate(){
+    
+    /** @return expiration date */
+    public LocalDate getExpirationDate() {
         return expirationDate;
     }
-    public String getImgFilePath(){
+    
+    /** @return image path */
+    public String getImgFilePath() {
         return imgFilePath;
     }
-
-    // Setter Methods
-    public void setName(String newName){
-        name = newName;
-        normalizedName = name.toLowerCase().trim();
-    }
-    public void setQuantity(double newQuantity){
-        quantity = newQuantity;
-    }
-    public void setUnit(String newUnit){
-        unit = newUnit;
-    }
-    public void setCategory(Category newCategory){
-        category = newCategory;
-    }
-    public void setExpirationDate(LocalDate newExpirationDate){
-        expirationDate = newExpirationDate;
-    }
-    public void setImgFilePath(String newImgFilePath){
-        imgFilePath = newImgFilePath;
-    }
     
-    // Adds to the current quantity (ignores negative/zero)
+    /**
+     * Adds quantity.
+     * 
+     * @param amt amount to add
+     */
     public void addQuantity(double amt) {
-        if (amt <= 0) return;
-        quantity += amt;
+        if (amt > 0) {
+            quantity += amt;
+        }
     }
     
-    // Subtracts quantity if possible.
-    // Returns true if subtraction happened, false if invalid or not enough.
+    /**
+     * Subtracts quantity if possible.
+     * 
+     * @param amt amount to subtract
+     * @return true if successful
+     */
     public boolean subtractQuantity(double amt) {
-        if (amt <= 0) return false;
-        if (amt > quantity) return false;
+        if (amt <= 0 || amt > quantity) {
+            return false;
+        }
     
         quantity -= amt;
 
         return true;
     }
     
-    // Number of days until expiration (0 = expires today, negative = already expired)
+    /**
+     * Sets quantity by adjusting using addQuantity and subtractQuantity
+     * 
+     * @param amt new quantity
+     */
+    public void setQuantity(double amt) {
+        if (amt >= 0) {
+            double diff = amt - quantity;
+            
+            if (diff > 0) {
+                addQuantity(diff);
+            }
+            else if (diff < 0) {
+                subtractQuantity(-diff);
+            }
+        }
+    }
+    
+    /**
+     * Calculates days until expiration.
+     * @param today reference date
+     * @return days until expiration
+     */
     public long daysUntilExpiration(LocalDate today) {
-        if (today == null) today = LocalDate.now();
         return ChronoUnit.DAYS.between(today, expirationDate);
+    }
+    
+    /** @return readable string */
+    public String toString() {
+        return name + " (" + quantity + " " + unit + ")";
     }
 }
