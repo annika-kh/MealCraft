@@ -9,6 +9,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.scene.text.Font;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -55,8 +56,8 @@ public class App extends Application {
     // ---- Shopping UI pieces ----
     private VBox shoppingListBox;
 
-    // ---- Simple style constants
-    private static final String BG = "#BDBDBD";
+    // ---- Simple style constants (CSS -> Java setStyle) ----
+    private static final String BG = "#9c9c9c";
     private static final String PANEL_BG = "#d6d6d6";
     private static final String BORDER = "#2b2b2b";
     private static final String BTN_BG = "#6e6e6e";
@@ -69,13 +70,21 @@ public class App extends Application {
     }
 
     public void start(Stage stage) {
+        Font.loadFont(
+            getClass().getResourceAsStream("/fonts/PixelifySans-Regular.ttf"),
+            12
+        );
+        
         // ----------------
         // Build sample data
         // ----------------
         fridge = buildDemoFridge(); // replace with your real loading later if you want
 
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: " + BG + "; -fx-font-family: Pixelify Sans;");
+        root.setStyle("""
+            -fx-background-color: #bdbdbd;
+            -fx-font-family: 'Pixelify Sans';
+        """);
 
         // Top bar: title + tabs
         HBox top = buildTopBar();
@@ -92,7 +101,7 @@ public class App extends Application {
 
         pageHost.getChildren().addAll(inventoryPage, recipesPage, shoppingPage);
 
-        showPage("Inventory");
+        showPage("inventory");
 
         Scene scene = new Scene(root, 1100, 650);
         stage.setTitle("MealCraft");
