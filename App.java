@@ -55,8 +55,8 @@ public class App extends Application {
     // ---- Shopping UI pieces ----
     private VBox shoppingListBox;
 
-    // ---- Simple style constants (CSS -> Java setStyle) ----
-    private static final String BG = "#9c9c9c";
+    // ---- Simple style constants
+    private static final String BG = "#BDBDBD";
     private static final String PANEL_BG = "#d6d6d6";
     private static final String BORDER = "#2b2b2b";
     private static final String BTN_BG = "#6e6e6e";
@@ -75,7 +75,7 @@ public class App extends Application {
         fridge = buildDemoFridge(); // replace with your real loading later if you want
 
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: " + BG + "; -fx-font-family: Verdana;");
+        root.setStyle("-fx-background-color: " + BG + "; -fx-font-family: Pixelify Sans;");
 
         // Top bar: title + tabs
         HBox top = buildTopBar();
@@ -92,7 +92,7 @@ public class App extends Application {
 
         pageHost.getChildren().addAll(inventoryPage, recipesPage, shoppingPage);
 
-        showPage("inventory");
+        showPage("Inventory");
 
         Scene scene = new Scene(root, 1100, 650);
         stage.setTitle("MealCraft");
@@ -115,9 +115,9 @@ public class App extends Application {
         Label title = new Label("MealCraft");
         title.setStyle("-fx-font-size: 40px; -fx-font-weight: bold;");
 
-        tabInventory = makeTabButton("inventory");
-        tabShopping = makeTabButton("shopping list");
-        tabRecipes = makeTabButton("recipes");
+        tabInventory = makeTabButton("Inventory");
+        tabShopping = makeTabButton("Shopping List");
+        tabRecipes = makeTabButton("Recipes");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -137,13 +137,13 @@ public class App extends Application {
     }
 
     private void showPage(String which) {
-        inventoryPage.setVisible(which.equals("inventory"));
-        recipesPage.setVisible(which.equals("recipes"));
-        shoppingPage.setVisible(which.equals("shopping list"));
+        inventoryPage.setVisible(which.equals("Inventory"));
+        recipesPage.setVisible(which.equals("Recipes"));
+        shoppingPage.setVisible(which.equals("Shopping List"));
 
-        styleTab(tabInventory, which.equals("inventory"));
-        styleTab(tabRecipes, which.equals("recipes"));
-        styleTab(tabShopping, which.equals("shopping list"));
+        styleTab(tabInventory, which.equals("Inventory"));
+        styleTab(tabRecipes, which.equals("Recipes"));
+        styleTab(tabShopping, which.equals("Shopping List"));
 
         refreshAll();
     }
@@ -471,7 +471,7 @@ public class App extends Application {
         addToList.setOnAction(e -> {
             // easiest: regenerate shopping list (based on current inventory + recipes)
             fridge.createShoppingList();
-            showPage("shopping list");
+            showPage("Shopping List");
         });
 
         cook.setOnAction(e -> {
@@ -569,6 +569,8 @@ public class App extends Application {
                     "-fx-font-size: 14px;"
             );
 
+            String key = line.getNormalizedName();
+            
             // remove 1 unit each click (you can change to line.getAmount() to remove all)
             x.setOnAction(e -> {
                 fridge.removeShoppingListItem(line.getNormalizedName(), 1);
@@ -787,11 +789,11 @@ public class App extends Application {
     private Fridge buildDemoFridge() {
         Fridge f = new Fridge();
 
-        f.addFood(new FoodItem("watermelon", 1, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(7), "fooditem-images/melon.png"));
-        f.addFood(new FoodItem("potato", 1, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(1), "fooditem-images/potato.png"));
-        f.addFood(new FoodItem("milk", 1, "cup", Category.DAIRY_EGGS, LocalDate.now().plusDays(2), "fooditem-images/milk.png"));
-        f.addFood(new FoodItem("chicken", 1, "x", Category.PROTEINS, LocalDate.now().plusDays(3), "fooditem-images/chicken.png"));
-        f.addFood(new FoodItem("tomato", 2, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(8), "fooditem-images/tomato.png"));
+        f.addFood(new FoodItem("watermelon", 1, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(7), "melon.png"));
+        f.addFood(new FoodItem("potato", 1, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(1), "potato.png"));
+        f.addFood(new FoodItem("milk", 1, "cup", Category.DAIRY_EGGS, LocalDate.now().plusDays(2), "milk.png"));
+        f.addFood(new FoodItem("chicken", 1, "x", Category.PROTEINS, LocalDate.now().plusDays(3), "chicken.png"));
+        f.addFood(new FoodItem("tomato", 2, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(8), "tomato.png"));
 
         // sample recipe
         List<IngredientLine> ing = new ArrayList<>();

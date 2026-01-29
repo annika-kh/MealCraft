@@ -7,7 +7,7 @@ import java.util.*;
  */
 public class Fridge {
     /** low stock threshold */
-    private static final double LOW_STOCK_THRESHOLD = 2;
+    private static final double LOW_STOCK_THRESHOLD = 1;
     /** food inventory */
     private HashMap<String, FoodItem> inventoryByName;
     /** expiration index */
@@ -169,7 +169,11 @@ public class Fridge {
         shoppingList.clear();
         
         for (FoodItem item : getLowStockItems()) {
-            shoppingList.put(item.getNormalizedName(), new IngredientLine(item.getName(), LOW_STOCK_THRESHOLD - item.getQuantity(), item.getUnit()));
+            double shortage = LOW_STOCK_THRESHOLD - item.getQuantity();
+            
+            if (shortage > 0) {
+                shoppingList.put(item.getNormalizedName(), new IngredientLine(item.getName(), shortage, item.getUnit()));
+            }
         }
     }
     
@@ -177,16 +181,16 @@ public class Fridge {
      * Removes amount from shopping list.
      */
     public void removeShoppingListItem(String name, double amt) {
-        String key = name.toLowerCase().trim();
-        IngredientLine line = shoppingList.get(key);
+        name = name.toLowerCase().trim();
+        IngredientLine line = shoppingList.get(name);
         if (line != null) {
             double remaining = line.getAmount() - amt;
             
             if (remaining <= 0) {
-                shoppingList.remove(key);
+                shoppingList.remove(name);
             }
             else {
-                shoppingList.put(key, new IngredientLine(line.getNormalizedName(), remaining, line.getUnit()));
+                shoppingList.put(name, new IngredientLine(line.getNormalizedName(), remaining, line.getUnit()));
             }
         }
     }
