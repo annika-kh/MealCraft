@@ -1,3 +1,4 @@
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -48,6 +49,7 @@ public class App extends Application {
     private GridPane inventoryGrid;
     private VBox itemDetailsBox;
     private VBox infoBox;
+    private ComboBox<String> inventorySortBox;
 
     // ---- Recipes UI pieces ----
     private GridPane recipeGrid;
@@ -173,6 +175,7 @@ public class App extends Application {
     // =========================================================
 
     private Pane buildInventoryPage() {
+        
         HBox row = new HBox(22);
         row.setPadding(new Insets(6));
 
@@ -181,23 +184,23 @@ public class App extends Application {
         HBox topLine = new HBox();
         topLine.setAlignment(Pos.CENTER_RIGHT);
 
-        Button sort = new Button("sort by: a-z");
-        styleButton(sort);
-        sort.setOnAction(e -> {
-            // already sorted by default; just refresh
-            refreshInventoryGrid();
-        });
+        inventorySortBox = new ComboBox<>();
+        inventorySortBox.getItems().addAll("A-Z", "Expiration Date");
+        inventorySortBox.setValue("A-Z");
+        inventorySortBox.setPrefWidth(160);
+        
+        inventorySortBox.setOnAction(e -> refreshInventoryGrid());
 
-        topLine.getChildren().add(sort);
+        topLine.getChildren().add(inventorySortBox);
 
         inventoryGrid = new GridPane();
         inventoryGrid.setHgap(8);
         inventoryGrid.setVgap(8);
         inventoryGrid.setPadding(new Insets(10, 0, 10, 0));
 
-        Button addItem = new Button("add item");
+        Button addItem = new Button("Add Item");
         styleButton(addItem);
-        addItem.setOnAction(e -> addItemDialog());
+        addItem.setOnAction(e -> addItemDialog((Stage) addItem.getScene().getWindow()));
 
         leftPanel.getChildren().addAll(topLine, inventoryGrid, alignBottom(addItem));
 
@@ -229,6 +232,14 @@ public class App extends Application {
         // Pull items sorted A-Z (your Fridge method)
         List<FoodItem> items = fridge.getAllFoodItemsSortedAZ();
 
+        String sort = inventorySortBox.getValue();
+        if (sort != null && sort.equals("Expiration Date")) {
+            items = fridge.getAllFoodItemsSortedExpiration();
+        } 
+        else {
+            items = fridge.getAllFoodItemsSortedAZ();
+        }
+        
         // Grid size like mockup (5 columns x 6 rows)
         int cols = 5;
         int maxTiles = 25; // adjust to match your layout
@@ -289,7 +300,7 @@ public class App extends Application {
 
         Button edit = new Button("edit item");
         styleButton(edit);
-        edit.setOnAction(e -> editItemDialog(selectedFoodItem));
+        edit.setOnAction(e -> editItemDialog((Stage) edit.getScene().getWindow(), selectedFoodItem));
 
         itemDetailsBox.getChildren().addAll(big, name, cat, qty, exp, edit);
     }
@@ -363,7 +374,7 @@ public class App extends Application {
 
         Button addRecipe = new Button("add recipe");
         styleButton(addRecipe);
-        addRecipe.setOnAction(e -> addRecipeDialog());
+        addRecipe.setOnAction(e -> alert("Add recipe dialog not implemented yet."));
 
         leftPanel.getChildren().addAll(topLine, recipeGrid, alignBottom(addRecipe));
         leftPanel.setPrefWidth(350);
@@ -598,46 +609,179 @@ public class App extends Application {
     // DIALOGS (simple BlueJ-friendly)
     // =========================================================
 
-    private void addItemDialog() {
-        TextInputDialog d = new TextInputDialog("tomato");
-        d.setTitle("Add Food");
-        d.setHeaderText("Enter item name:");
-        d.setContentText("Name:");
-        d.showAndWait().ifPresent(name -> {
-            // quick default add: qty=1, unit=x, OTHER, expires in 7 days, image empty
-            fridge.addFood(new FoodItem(name, 1, "x", Category.OTHER, LocalDate.now().plusDays(7), ""));
-            refreshAll();
+    private void addItemDialog(Stage stage) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add Food Item");
+    
+        ButtonType addBtn = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addBtn, ButtonType.CANCEL);
+    
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(10));
+    
+        TextField nameField = new TextField();
+        TextField qtyField = new TextField("1");
+        TextField unitField = new TextField("x");
+    
+        ComboBox<Category> catBox = new ComboBox<>();
+        catBox.getItems().addAll(Category.values());
+        catBox.setValue(Category.OTHER);
+    
+        DatePicker expPicker = new DatePicker(LocalDate.now().plusDays(7));
+    
+        TextField imgField = new TextField();
+        imgField.setEditable(false);
+    
+        Button browse = new Button("Browse...");
+        styleButton(browse);
+    
+        browse.setOnAction(e -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Choose Image");
+            chooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg")
+            );
+            File file = chooser.showOpenDialog(stage);
+            if (file != null) {
+                imgField.setText(file.getAbsolutePath());
+            }
         });
-    }
-
-    private void editItemDialog(FoodItem item) {
-        if (item == null) return;
-
-        TextInputDialog d = new TextInputDialog(formatQty(item.getQuantity()));
-        d.setTitle("Edit Item");
-        d.setHeaderText("Edit quantity for: " + item.getName());
-        d.setContentText("New quantity:");
-        d.showAndWait().ifPresent(qStr -> {
-            try {
-                double q = Double.parseDouble(qStr);
-                item.setQuantity(q);
-                refreshAll();
-            } catch (Exception ex) {
-                alert("Invalid number.");
+    
+        grid.add(new Label("Name:"), 0, 0);
+        grid.add(nameField, 1, 0);
+    
+        grid.add(new Label("Quantity:"), 0, 1);
+        grid.add(qtyField, 1, 1);
+    
+        grid.add(new Label("Unit:"), 0, 2);
+        grid.add(unitField, 1, 2);
+    
+        grid.add(new Label("Category:"), 0, 3);
+        grid.add(catBox, 1, 3);
+    
+        grid.add(new Label("Expiration:"), 0, 4);
+        grid.add(expPicker, 1, 4);
+    
+        grid.add(new Label("Image:"), 0, 5);
+        grid.add(new HBox(10, imgField, browse), 1, 5);
+    
+        dialog.getDialogPane().setContent(grid);
+    
+        dialog.showAndWait().ifPresent(result -> {
+            if (result == addBtn) {
+                try {
+                    String name = nameField.getText().trim();
+                    double qty = Double.parseDouble(qtyField.getText().trim());
+                    String unit = unitField.getText().trim();
+                    Category cat = catBox.getValue();
+                    LocalDate exp = expPicker.getValue();
+                    String img = imgField.getText().trim();
+    
+                    // If they didn't pick an image, store empty string and loader will use placeholder
+                    if (img == null) img = "";
+                    if (exp == null) exp = LocalDate.now().plusDays(7);
+                    if (cat == null) cat = Category.OTHER;
+    
+                    fridge.addFood(new FoodItem(name, qty, unit, cat, exp, img));
+    
+                    refreshAll();
+    
+                } catch (Exception ex) {
+                    alert("Invalid input. Check quantity and fields.");
+                }
             }
         });
     }
 
-    private void addRecipeDialog() {
-        TextInputDialog d = new TextInputDialog("New Recipe");
-        d.setTitle("Add Recipe");
-        d.setHeaderText("Enter recipe name:");
-        d.setContentText("Name:");
-        d.showAndWait().ifPresent(name -> {
-            // quick empty recipe; you can expand later
-            fridge.addRecipe(new Recipe(name, new ArrayList<>(), new ArrayList<>(), ""));
-            refreshAll();
-        });
+    private void editItemDialog(Stage stage, FoodItem item) {
+        if (item == null) {
+            alert("No item selected.");
+        } else {
+    
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Edit Item");
+    
+            ButtonType saveBtn = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(saveBtn, ButtonType.CANCEL);
+    
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(10));
+    
+            Label nameLabel = new Label(item.getName());
+    
+            TextField qtyField = new TextField(String.valueOf(item.getQuantity()));
+    
+            ComboBox<Category> catBox = new ComboBox<>();
+            catBox.getItems().addAll(Category.values());
+            catBox.setValue(item.getCategory());
+    
+            DatePicker expPicker = new DatePicker(item.getExpirationDate());
+    
+            TextField imgField = new TextField(item.getImgFilePath());
+            imgField.setEditable(false);
+    
+            Button browse = new Button("Browse...");
+            styleButton(browse);
+    
+            browse.setOnAction(e -> {
+                FileChooser chooser = new FileChooser();
+                chooser.setTitle("Choose Image");
+                chooser.getExtensionFilters().add(
+                        new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg")
+                );
+                File file = chooser.showOpenDialog(stage);
+                if (file != null) {
+                    imgField.setText(file.getAbsolutePath());
+                }
+            });
+    
+            grid.add(new Label("Item:"), 0, 0);
+            grid.add(nameLabel, 1, 0);
+    
+            grid.add(new Label("Quantity:"), 0, 1);
+            grid.add(qtyField, 1, 1);
+    
+            grid.add(new Label("Category:"), 0, 2);
+            grid.add(catBox, 1, 2);
+    
+            grid.add(new Label("Expiration:"), 0, 3);
+            grid.add(expPicker, 1, 3);
+    
+            grid.add(new Label("Image:"), 0, 4);
+            grid.add(new HBox(10, imgField, browse), 1, 4);
+    
+            dialog.getDialogPane().setContent(grid);
+    
+            dialog.showAndWait().ifPresent(result -> {
+                if (result == saveBtn) {
+                    try {
+                        double newQty = Double.parseDouble(qtyField.getText().trim());
+                        Category newCat = catBox.getValue();
+                        LocalDate newExp = expPicker.getValue();
+                        String newImg = imgField.getText().trim();
+    
+                        // Use your "setQuantity using add/subtract"
+                        item.setQuantity(newQty);
+    
+                        if (newCat != null) item.setCategory(newCat);
+                        if (newExp != null) item.setExpirationDate(newExp);
+    
+                        // Only if you have setter; if not, skip this line
+                        // item.setImgFilePath(newImg);
+    
+                        fridge.rebuildExpirationIndex(); // expiration changed
+                        refreshAll();
+    
+                    } catch (Exception ex) {
+                        alert("Invalid input. Quantity must be a number.");
+                    }
+                }
+            });
+        }
     }
 
     private void addShoppingItemDialog() {

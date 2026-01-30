@@ -115,11 +115,34 @@ public class FoodItem{
     
     /**
      * Calculates days until expiration.
+     * 
      * @param today reference date
      * @return days until expiration
      */
     public long daysUntilExpiration(LocalDate today) {
         return ChronoUnit.DAYS.between(today, expirationDate);
+    }
+    
+    /**
+     * Sets the expiration date.
+     * 
+     * @param date new expiration date
+     */
+    public void setExpirationDate(LocalDate date) {
+        if (date != null) {
+            expirationDate = date;
+        }
+    }
+    
+    /**
+     * Sets the category.
+     * 
+     * @param category new category
+     */
+    public void setCategory(Category newCategory) {
+        if (newCategory != null) {
+            category = newCategory;
+        }
     }
     
     /** @return readable string */

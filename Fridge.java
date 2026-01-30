@@ -82,6 +82,16 @@ public class Fridge {
     }
     
     /**
+     * Returns items sorted by expiration date (soonest first).
+     * If expiration dates are equal, items are sorted
+     */
+    public List<FoodItem> getAllFoodItemsSortedExpiration() {
+        List<FoodItem> list = getAllFoodItemsSortedAZ();
+        list.sort(Comparator.comparing(FoodItem::getExpirationDate));
+        return list;
+    }
+    
+    /**
      * Gets low stock items.
      */
     public List<FoodItem> getLowStockItems() {
