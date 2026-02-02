@@ -636,7 +636,7 @@ public class App extends Application {
                 double missing = needAmount - haveAmount;
 
                 // add missing amount to shopping list
-                fridge.addShoppingListItem(ing.getNormalizedName(), missing,ing.getUnit());
+                fridge.addShoppingListItem(ing.getNormalizedName(), missing, ing.getUnit());
             }
         }
     }
@@ -770,7 +770,7 @@ public class App extends Application {
             );
             File file = chooser.showOpenDialog(stage);
             if (file != null) {
-                imgField.setText(file.getAbsolutePath());
+                imgField.setText(file.toURI().toString()); // file:/... url
             }
         });
     
@@ -803,9 +803,12 @@ public class App extends Application {
                     Category cat = catBox.getValue();
                     LocalDate exp = expPicker.getValue();
                     String img = imgField.getText().trim();
-    
+                    
                     // If they didn't pick an image, store empty string and loader will use placeholder
-                    if (img == null) img = "";
+                    if (img.isBlank()) {
+                        img = imagePathForItemName(name);  // <--name+png
+                    }
+    
                     if (exp == null) exp = LocalDate.now().plusDays(7);
                     if (cat == null) cat = Category.OTHER;
     
@@ -860,7 +863,7 @@ public class App extends Application {
                 );
                 File file = chooser.showOpenDialog(stage);
                 if (file != null) {
-                    imgField.setText(file.getAbsolutePath());
+                    imgField.setText(file.toURI().toString()); // file:/... url
                 }
             });
     
@@ -910,13 +913,13 @@ public class App extends Application {
     }
 
     private void addShoppingItemDialog() {
-        TextInputDialog d = new TextInputDialog("milk");
+        TextInputDialog d = new TextInputDialog("ex. milk");
         d.setTitle("Add Shopping Item");
-        d.setHeaderText("Enter item name to add (amount + unit are basic here):");
+        d.setHeaderText("Enter item name to add:");
         d.setContentText("Name:");
         d.showAndWait().ifPresent(name -> {
             // easiest: add 1 unit in shopping list by regenerating then manually adjusting
-            fridge.createShoppingList();
+            fridge.addShoppingListItem(name, 1, "");
             // You can add a dedicated "addShoppingListItem" method later if you want.
             refreshShoppingList();
         });
@@ -1034,25 +1037,72 @@ public class App extends Application {
         return String.valueOf(q);
     }
 
-    private Image loadImageSafe(String path) {
-        try {
-            if (path == null || path.trim().isEmpty()) {
-                return new Image("file:fooditem-images/placeholder.png");
-            }
-
-            File f = new File(path);
-            if (!f.isAbsolute()) {
-                f = new File(System.getProperty("user.dir"), path);
-            }
-
-            if (!f.exists()) {
-                return new Image("file:fooditem-images/placeholder.png");
-            }
-
-            return new Image(f.toURI().toString());
-        } catch (Exception e) {
-            return new Image("file:fooditem-images/placeholder.png");
+    private Image loadImageSafe(String pathOrUrl) {
+    
+        // 1) uploaded image (file:/... or http...)
+        if (pathOrUrl != null && !pathOrUrl.isBlank()) {
+            try {
+                if (pathOrUrl.startsWith("file:") || pathOrUrl.startsWith("http")) {
+                    return new Image(pathOrUrl, true);
+                }
+            } catch (Exception ignore) {}
         }
+    
+        // 2) classpath resource (works if images are in src/main/resources)
+        if (pathOrUrl != null && !pathOrUrl.isBlank()) {
+            try {
+                String res = pathOrUrl.startsWith("/") ? pathOrUrl : "/" + pathOrUrl;
+                var url = getClass().getResource(res);
+                if (url != null) return new Image(url.toExternalForm(), true);
+            } catch (Exception ignore) {}
+        }
+    
+        // 3) relative disk path (works if images folder is just in your project directory)
+        if (pathOrUrl != null && !pathOrUrl.isBlank()) {
+            try {
+                File f = new File(pathOrUrl); // e.g. "fooditem-images/milk.png"
+                if (f.exists()) return new Image(f.toURI().toString(), true);
+            } catch (Exception ignore) {}
+        }
+    
+        // 4) fallback: name + .png (fooditem-images/<name>.png)
+        if (pathOrUrl != null && !pathOrUrl.isBlank()) {
+            String normalized = pathOrUrl
+                    .toLowerCase()
+                    .replaceAll("[^a-z0-9]+", "");
+        
+            Image byName = tryResourceThenDisk(
+                    "/fooditem-images/" + normalized + ".png",
+                    "fooditem-images/" + normalized + ".png"
+            );
+            if (byName != null) return byName;
+        }
+    
+        // 5) mystery fallback
+        Image placeholder = tryResourceThenDisk("placeholder.png", "placeholder.png");
+        if (placeholder != null) return placeholder;
+    
+        return new Image("data:,", true);
+    }
+    
+    private String imagePathForItemName(String itemName) {
+        if (itemName == null) return "placeholder.png";
+        String normalized = itemName.trim().toLowerCase().replaceAll("\\s+", "");
+        return "fooditem-images/" + normalized + ".png";
+    }
+
+    private Image tryResourceThenDisk(String resPath, String diskPath) {
+        try {
+            var url = getClass().getResource(resPath);
+            if (url != null) return new Image(url.toExternalForm(), true);
+        } catch (Exception ignore) {}
+    
+        try {
+            File f = new File(diskPath);
+            if (f.exists()) return new Image(f.toURI().toString(), true);
+        } catch (Exception ignore) {}
+    
+        return null;
     }
 
     private Stage stageFrom(Pane anyNodeOnScene) {
@@ -1067,11 +1117,11 @@ public class App extends Application {
     private Fridge buildDemoFridge() {
         Fridge f = new Fridge();
 
-        f.addFood(new FoodItem("watermelon", 1, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(7), "melon.png"));
-        f.addFood(new FoodItem("potato", 1, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(1), "potato.png"));
-        f.addFood(new FoodItem("milk", 1, "cup", Category.DAIRY_EGGS, LocalDate.now().plusDays(2), "milk.png"));
-        f.addFood(new FoodItem("chicken", 1, "x", Category.PROTEINS, LocalDate.now().plusDays(3), "chicken.png"));
-        f.addFood(new FoodItem("tomato", 2, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(8), "tomato.png"));
+        f.addFood(new FoodItem("watermelon", 1, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(7), "fooditem-images/watermelon.png"));
+        f.addFood(new FoodItem("potato", 1, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(1), "fooditem-images/potato.png"));
+        f.addFood(new FoodItem("milk", 1, "cup", Category.DAIRY_EGGS, LocalDate.now().plusDays(2), "fooditem-images/milk.png"));
+        f.addFood(new FoodItem("chicken", 1, "x", Category.PROTEINS, LocalDate.now().plusDays(3), "fooditem-images/chicken.png"));
+        f.addFood(new FoodItem("tomato", 2, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(8), "fooditem-images/tomato.png"));
 
         // sample recipe
         List<IngredientLine> ing = new ArrayList<>();
@@ -1085,7 +1135,7 @@ public class App extends Application {
         steps.add("Add water and milk");
         steps.add("Bring to a boil");
 
-        f.addRecipe(new Recipe("Annika Stew", steps, ing, "recipe-images/stew.png"));
+        f.addRecipe(new Recipe("Annika Stew", steps, ing, "fooditem-images/annikastew.png"));
 
         f.createShoppingList();
         return f;

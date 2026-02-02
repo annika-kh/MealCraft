@@ -218,17 +218,20 @@ public class Fridge {
      * Adds a specific amount of an ingredient to the shopping list.
      * If it already exists, it increases the amount.
      */
-    public void addShoppingListItem(String name, double amount, String unit) {
-        if (name == null || amount <= 0) return;
-
-        String key = name.toLowerCase().trim();
+    public void addShoppingListItem(String name, double amt, String unit) {
+        if (name == null || name.isBlank()) return;
+    
+        String key = name.toLowerCase().trim().replaceAll("\\s+", "");
+        if (unit == null || unit.isBlank()) unit = "";
+    
         IngredientLine existing = shoppingList.get(key);
-
-        if (existing != null) {
-            double newAmount = existing.getAmount() + amount;
-            shoppingList.put(key, new IngredientLine(existing.getNormalizedName(), newAmount, unit));
+        if (existing == null) {
+            shoppingList.put(key, new IngredientLine(name, amt, unit));
         } else {
-            shoppingList.put(key, new IngredientLine(name, amount, unit));
+            shoppingList.put(
+                key,
+                new IngredientLine(existing.getNormalizedName(), existing.getAmount() + amt, existing.getUnit())
+            );
         }
     }
 
