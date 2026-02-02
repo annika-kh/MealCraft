@@ -11,6 +11,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.text.Font;
+import java.util.Optional;
 
 import java.io.File;
 import java.io.FileWriter;
