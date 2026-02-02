@@ -54,6 +54,7 @@ public class App extends Application {
     // ---- Recipes UI pieces ----
     private GridPane recipeGrid;
     private VBox recipeBookBox;
+    private RecipeSortMode recipeSortMode = RecipeSortMode.A_Z;
 
     // ---- Shopping UI pieces ----
     private VBox shoppingListBox;
@@ -340,10 +341,26 @@ public class App extends Application {
         infoBox.getChildren().addAll(useSoon, useSoonList, new Label(""), low, lowList);
     }
 
-    // =========================================================
+   // =========================================================
     // RECIPES PAGE (left grid + right "book")
     // =========================================================
+    private enum RecipeSortMode {
+        A_Z("A–Z"),
+        INGREDIENT_AVAILABILITY("Ingredient availability"),
+        USE_SOON("Uses expiring ingredients");
 
+        private final String label;
+
+        RecipeSortMode(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    } 
+    
     private Pane buildRecipesPage() {
         HBox row = new HBox(22);
         row.setPadding(new Insets(6));
@@ -353,19 +370,17 @@ public class App extends Application {
         HBox topLine = new HBox();
         topLine.setAlignment(Pos.CENTER_RIGHT);
 
-        Button best = new Button("sort by: best recipe");
-        styleButton(best);
-        best.setOnAction(e -> {
-            // choose a best recipe if you have that method; otherwise pick first cookable
-            Recipe r = null;
-            List<Recipe> cookable = fridge.getCookableRecipes();
-            if (!cookable.isEmpty()) r = cookable.get(0);
-            if (r == null && !fridge.getRecipes().isEmpty()) r = fridge.getRecipes().get(0);
-            selectedRecipe = r;
-            refreshRecipeBook();
+        ComboBox<RecipeSortMode> sortDropdown = new ComboBox<>();
+        sortDropdown.getItems().addAll(RecipeSortMode.values());
+        sortDropdown.setValue(recipeSortMode);
+        sortDropdown.setPrefWidth(220);
+
+        sortDropdown.setOnAction(e -> {
+            recipeSortMode = sortDropdown.getValue();
+            refreshRecipeGrid();
         });
 
-        topLine.getChildren().add(best);
+        topLine.getChildren().add(sortDropdown);
 
         recipeGrid = new GridPane();
         recipeGrid.setHgap(8);
@@ -374,7 +389,7 @@ public class App extends Application {
 
         Button addRecipe = new Button("add recipe");
         styleButton(addRecipe);
-        addRecipe.setOnAction(e -> alert("Add recipe dialog not implemented yet."));
+        addRecipe.setOnAction(e -> addRecipeDialog());
 
         leftPanel.getChildren().addAll(topLine, recipeGrid, alignBottom(addRecipe));
         leftPanel.setPrefWidth(350);
@@ -398,8 +413,14 @@ public class App extends Application {
 
     private void refreshRecipeGrid() {
         recipeGrid.getChildren().clear();
+
         List<Recipe> recipes = new ArrayList<>(fridge.getRecipes());
-        recipes.sort(Comparator.comparing(Recipe::getName, String.CASE_INSENSITIVE_ORDER));
+
+        switch (recipeSortMode) {
+            case A_Z -> sortRecipesAZ(recipes);
+            case INGREDIENT_AVAILABILITY -> sortByIngredientAvailability(recipes);
+            case USE_SOON -> sortByExpiringIngredients(recipes);
+        }
 
         int cols = 5;
         int maxTiles = 20;
@@ -424,11 +445,59 @@ public class App extends Application {
             } else {
                 tile.setStyle(tile.getStyle() + "-fx-background-color: #bcbcbc;");
             }
-
+    
             recipeGrid.add(tile, i % cols, i / cols);
         }
     }
+    
+    private void sortRecipesAZ(List<Recipe> recipes) {
+        for (int i = 0; i < recipes.size(); i++) {
+            for (int j = i + 1; j < recipes.size(); j++) {
 
+                String name1 = recipes.get(i).getName();
+                String name2 = recipes.get(j).getName();
+
+                if (name1.compareToIgnoreCase(name2) > 0) {
+                    Recipe temp = recipes.get(i);
+                    recipes.set(i, recipes.get(j));
+                    recipes.set(j, temp);
+                }
+            }
+        }
+    }
+    
+    private void sortByIngredientAvailability(List<Recipe> recipes) {
+        for (int i = 0; i < recipes.size(); i++) {
+            for (int j = i + 1; j < recipes.size(); j++) {
+
+                double missing1 = recipes.get(i).getMissingIngredients(fridge);
+                double missing2 = recipes.get(j).getMissingIngredients(fridge);
+
+                if (missing1 > missing2) {
+                    Recipe temp = recipes.get(i);
+                    recipes.set(i, recipes.get(j));
+                    recipes.set(j, temp);
+                }
+            }
+        }
+    }
+    
+    private void sortByExpiringIngredients(List<Recipe> recipes) {
+        for (int i = 0; i < recipes.size(); i++) {
+            for (int j = i + 1; j < recipes.size(); j++) {
+
+                long days1 = recipes.get(i).getEarliestExpirationDays(fridge);
+                long days2 = recipes.get(j).getEarliestExpirationDays(fridge);
+
+                if (days1 > days2) {
+                    Recipe temp = recipes.get(i);
+                    recipes.set(i, recipes.get(j));
+                    recipes.set(j, temp);
+                }
+            }
+        }
+    }
+    
     private void refreshRecipeBook() {
         recipeBookBox.getChildren().clear();
 
@@ -470,7 +539,10 @@ public class App extends Application {
 
         int idx = 1;
         for (String s : selectedRecipe.getSteps()) {
-            stepBox.getChildren().add(new Label(idx + ". " + s));
+            Label stepLabel = new Label(idx + ". " + s);
+            stepLabel.setWrapText(true);
+            stepLabel.setMaxWidth(330);   // adjust to fit your right column
+            stepBox.getChildren().add(stepLabel);
             idx++;
         }
 
@@ -489,9 +561,9 @@ public class App extends Application {
         );
 
         addToList.setOnAction(e -> {
-            // easiest: regenerate shopping list (based on current inventory + recipes)
-            fridge.createShoppingList();
-            showPage("Shopping List");
+            addMissingIngredientsToShoppingList(selectedRecipe);
+            showPage("shopping list");
+            refreshShoppingList();
         });
 
         cook.setOnAction(e -> {
@@ -499,7 +571,8 @@ public class App extends Application {
             if (!ok) {
                 alert("Not enough ingredients to cook this recipe.");
             } else {
-                fridge.createShoppingList();
+                //NEW ADDITION
+                //fridge.createShoppingList();
                 refreshAll();
                 alert("Cooked! Inventory updated.");
             }
@@ -515,6 +588,56 @@ public class App extends Application {
 
         topRow.getChildren().addAll(left, right);
         recipeBookBox.getChildren().add(topRow);
+    }
+    
+    private void addRecipeDialog() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Choose Recipe Text File");
+
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+
+        File file = chooser.showOpenDialog(null);
+        if (file == null){
+            return;
+        }
+
+        TextInputDialog nameDialog = new TextInputDialog();
+        nameDialog.setTitle("Recipe Name");
+        nameDialog.setHeaderText("Enter a name for this recipe");
+        nameDialog.setContentText("Recipe name:");
+
+        Optional<String> result = nameDialog.showAndWait();
+        if (result.isEmpty()){
+            return;
+        }
+
+        try {
+            Recipe recipe = Recipe.fromTxtFile(result.get(),file,"fooditem-images/default_recipe.png");
+            fridge.addRecipe(recipe);
+            refreshRecipeGrid();
+        } catch (Exception ex) {
+            alert("Failed to load recipe file.\n" + ex.getMessage());
+        }
+    }
+    
+    private void addMissingIngredientsToShoppingList(Recipe recipe) {
+        if (recipe == null){
+            return;
+        }
+
+        for (IngredientLine ing : recipe.getIngredients()) {
+            FoodItem have = fridge.getFoodItem(ing.getNormalizedName());
+
+            double haveAmount = (have == null) ? 0 : have.getQuantity();
+            double needAmount = ing.getAmount();
+
+            if (haveAmount < needAmount) {
+                double missing = needAmount - haveAmount;
+
+                // add missing amount to shopping list
+                fridge.addShoppingListItem(ing.getNormalizedName(), missing,ing.getUnit());
+            }
+        }
     }
 
     // =========================================================
@@ -564,7 +687,8 @@ public class App extends Application {
         shoppingListBox.getChildren().clear();
 
         // ensure list exists
-        fridge.createShoppingList();
+        // Add ingredients to recipe function doesnt work if this function runs
+        // fridge.createShoppingList();
 
         List<IngredientLine> lines = new ArrayList<>(fridge.getShoppingListItems());
         lines.sort(Comparator.comparing(IngredientLine::getNormalizedName));
