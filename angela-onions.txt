@@ -1,0 +1,8 @@
+Steps:
+1. Chop onions into cubes
+2. Stir fry them for 5 minutes 
+3. Beat an egg and add it into the pan with the onions
+4. Serve when eggs are cooked
+Ingredients:
+Onion <1x>
+Egg <2x>

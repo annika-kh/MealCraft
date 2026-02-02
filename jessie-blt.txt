@@ -1,0 +1,11 @@
+Steps:
+1. Fry bacon in a pan until cooked
+2. Toast a bagel
+3. Spread mayo on both sides of the bagel
+4. Add lettuce, tomato, and bacon
+5. Eat it
+Ingredients:
+Bacon <x2>
+Lettuce <x4>
+Tomato <x1>
+Bagel <x1>
