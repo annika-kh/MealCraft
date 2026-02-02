@@ -213,4 +213,35 @@ public class Fridge {
     public java.util.Collection<IngredientLine> getShoppingListItems() {
         return shoppingList.values();
     }
+
+    /**
+     * Adds a specific amount of an ingredient to the shopping list.
+     * If it already exists, it increases the amount.
+     */
+    public void addShoppingListItem(String name, double amount, String unit) {
+        if (name == null || amount <= 0) return;
+
+        String key = name.toLowerCase().trim();
+        IngredientLine existing = shoppingList.get(key);
+
+        if (existing != null) {
+            double newAmount = existing.getAmount() + amount;
+            shoppingList.put(key, new IngredientLine(existing.getNormalizedName(), newAmount, unit));
+        } else {
+            shoppingList.put(key, new IngredientLine(name, amount, unit));
+        }
+    }
+
+    public Recipe getRecipeWithIngredients(){
+        double max = 0;
+        Recipe bestRecipe = null;
+        for(Recipe recipe : recipes){
+            double temp = recipe.getMissingIngredients(this);
+            if(max < temp){
+                max = temp;
+                bestRecipe = recipe;
+            }
+        }
+        return bestRecipe;
+    }
 }
