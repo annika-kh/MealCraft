@@ -95,8 +95,10 @@ public class Recipe {
 
         for (IngredientLine ing : ingredients) {
             FoodItem item = fridge.getFoodItem(ing.getNormalizedName());
+
             if (item != null) {
                 long days = item.daysUntilExpiration(LocalDate.now());
+
                 if (days < earliest) {
                     earliest = days;
                 }
@@ -122,27 +124,26 @@ public class Recipe {
         return true;
     }
     
+
     /**
-     * Reads a txt file containing the user-generated recipe
+     * Creates a Recipe by reading a text file containing the user-generated recipe
      * 
-     * @param recipeName = name, txtResourcePath = file path, imgFilePath = image file path
-     * @return the Recipe 
+     * @param recipeName      the display name of the recipe
+     * @param file            the text file containing the recipe data
+     * @param imgFilePath     the file path to the recipe image
+     * @return                a fully constructed Recipe object
      */
-    public static Recipe fromTxt(String recipeName,String txtResourcePath,String imgFilePath) {
+    public static Recipe fromTxtFile(String recipeName,File file,String imgFilePath) throws Exception {
         List<String> steps = new ArrayList<>();
         List<IngredientLine> ingredients = new ArrayList<>();
         boolean readingSteps = false;
         boolean readingIngredients = false;
 
-        try (InputStream is = Recipe.class.getResourceAsStream(txtResourcePath);
-             BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-            if (is == null) {
-                throw new RuntimeException("Recipe file not found: " + txtResourcePath);
-            }
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty()) {
+                if (line.isEmpty()){
                     continue;
                 }
                 if (line.equalsIgnoreCase("Steps:")) {
@@ -163,7 +164,7 @@ public class Recipe {
                 if (readingIngredients) {
                     int lt = line.indexOf('<');
                     int gt = line.indexOf('>');
-                    if (lt == -1 || gt == -1) {
+                    if (lt == -1 || gt == -1){
                         continue;
                     }
                     String name = line.substring(0, lt).trim();
@@ -172,8 +173,6 @@ public class Recipe {
                     ingredients.add(new IngredientLine(name, amount, "unit"));
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load recipe txt", e);
         }
 
         return new Recipe(recipeName, steps, ingredients, imgFilePath);
