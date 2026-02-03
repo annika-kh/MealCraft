@@ -52,6 +52,8 @@ public class Recipe {
      * 
      * @param fridge
      * @return true if possible
+     * 
+     * Contributed by: Annika Hambali
      */
     public boolean canCook(Fridge fridge) {
         for (IngredientLine line : ingredients) {
@@ -68,6 +70,8 @@ public class Recipe {
      * 
      * @param fridge
      * @return the number of ingredients missing
+     * 
+     * Contributed by: Jessie Luo
      */
     public double getMissingIngredients(Fridge fridge){
         double cnt = 0;
@@ -89,6 +93,8 @@ public class Recipe {
      * 
      * @param fridge
      * @return the number of days until it expires
+     * 
+     * Contributed by: Jessie Luo
      */
     public long getEarliestExpirationDays(Fridge fridge) {
         long earliest = Long.MAX_VALUE;
@@ -113,6 +119,8 @@ public class Recipe {
      * 
      * @param fridge
      * @return true if the operation was successful
+     * 
+     * Contributed by: Jessie Luo
      */
     public boolean cook(Fridge fridge) {
         if (!canCook(fridge)) {
@@ -132,6 +140,8 @@ public class Recipe {
      * @param file            the text file containing the recipe data
      * @param imgFilePath     the file path to the recipe image
      * @return                a fully constructed Recipe object
+     * 
+     * Contributed by: Jessie Luo
      */
     public static Recipe fromTxtFile(String recipeName,File file,String imgFilePath) throws Exception {
         List<String> steps = new ArrayList<>();
