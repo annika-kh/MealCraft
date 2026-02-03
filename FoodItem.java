@@ -89,7 +89,7 @@ public class FoodItem {
      * Prevents invalid input by blocking negative values and amounts greater than available.
      * 
      * @param amt amount to subtract
-     * @return true if successful
+     * @return true if subtraction was successful, false otherwise
      * 
      * Contributed by: Annika Hambali
      */
