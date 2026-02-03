@@ -1,5 +1,7 @@
 /**
  * Represents a single ingredient in a recipe.
+ * 
+ * Contributed by: Annika Hambali
  */
 public class IngredientLine {
     /** normalized name */
