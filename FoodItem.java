@@ -4,7 +4,7 @@ import java.time.temporal.ChronoUnit;
 /**
  * Represents a food item stored in the fridge.
  */
-public class FoodItem{
+public class FoodItem {
     /** display name */
     private String name;
     /** normalized name used as key */
@@ -69,9 +69,11 @@ public class FoodItem{
     }
     
     /**
-     * Adds quantity.
+     * Adds item quantity.
      * 
      * @param amt amount to add
+     * 
+     * Contributed by: Annika Hambali
      */
     public void addQuantity(double amt) {
         if (amt > 0) {
@@ -80,10 +82,12 @@ public class FoodItem{
     }
     
     /**
-     * Subtracts quantity if possible.
+     * Subtracts from item quantity if possible.
      * 
      * @param amt amount to subtract
      * @return true if successful
+     * 
+     * Contributed by: Annika Hambali
      */
     public boolean subtractQuantity(double amt) {
         if (amt <= 0 || amt > quantity) {
@@ -96,9 +100,11 @@ public class FoodItem{
     }
     
     /**
-     * Sets quantity by adjusting using addQuantity and subtractQuantity
+     * Sets item quantity by adjusting using addQuantity and subtractQuantity
      * 
      * @param amt new quantity
+     * 
+     * Contributed by: Annika Hambali
      */
     public void setQuantity(double amt) {
         if (amt >= 0) {
@@ -118,6 +124,8 @@ public class FoodItem{
      * 
      * @param today reference date
      * @return days until expiration
+     * 
+     * Contributed by: Angela Zhong
      */
     public long daysUntilExpiration(LocalDate today) {
         return ChronoUnit.DAYS.between(today, expirationDate);
@@ -127,6 +135,8 @@ public class FoodItem{
      * Sets the expiration date.
      * 
      * @param date new expiration date
+     * 
+     * Contributed by: Angela Zhong
      */
     public void setExpirationDate(LocalDate date) {
         if (date != null) {
@@ -138,6 +148,8 @@ public class FoodItem{
      * Sets the category.
      * 
      * @param category new category
+     * 
+     * Contributed by: Angela Zhong
      */
     public void setCategory(Category newCategory) {
         if (newCategory != null) {
