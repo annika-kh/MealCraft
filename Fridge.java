@@ -235,6 +235,13 @@ public class Fridge {
         }
     }
 
+    /**
+     * Returns the recipe with the least number of missing ingredients
+     * 
+     * @return Recipe
+     * 
+     * Contributed by: Jessie
+     */
     public Recipe getRecipeWithIngredients(){
         double max = 0;
         Recipe bestRecipe = null;
