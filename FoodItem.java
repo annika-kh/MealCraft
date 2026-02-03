@@ -69,20 +69,24 @@ public class FoodItem {
     }
     
     /**
-     * Adds item quantity.
+     * Adds to the current quantity.
+     * Prevents invalid input by allowing only positive values.
      * 
      * @param amt amount to add
      * 
      * Contributed by: Annika Hambali
      */
     public void addQuantity(double amt) {
+        // Only allows positive values
         if (amt > 0) {
+            // Applies increase
             quantity += amt;
         }
     }
     
     /**
-     * Subtracts from item quantity if possible.
+     * Subtracts from the current quantity.
+     * Prevents invalid input by blocking negative values and amounts greater than available.
      * 
      * @param amt amount to subtract
      * @return true if successful
@@ -90,17 +94,19 @@ public class FoodItem {
      * Contributed by: Annika Hambali
      */
     public boolean subtractQuantity(double amt) {
+        // Blocks negative values or amounts greater than available
         if (amt <= 0 || amt > quantity) {
             return false;
         }
     
+        // Applies decrease
         quantity -= amt;
 
         return true;
     }
     
     /**
-     * Sets item quantity by adjusting using addQuantity and subtractQuantity
+     * Sets a new quantity by calculating the difference and using addQuantity and subtractQuantity.
      * 
      * @param amt new quantity
      * 
@@ -108,12 +114,15 @@ public class FoodItem {
      */
     public void setQuantity(double amt) {
         if (amt >= 0) {
+            // Computes change amount
             double diff = amt - quantity;
             
             if (diff > 0) {
+                // Applies increase
                 addQuantity(diff);
             }
             else if (diff < 0) {
+                // Applies decrease
                 subtractQuantity(-diff);
             }
         }
