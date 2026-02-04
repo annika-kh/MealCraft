@@ -31,6 +31,8 @@ public class Fridge {
      * Adds a food item to the fridge inventory.
      * 
      * @param food the FoodItem to add
+     * 
+     * Contributed by: Annika Hambali
      */
     public void addFood(FoodItem food){
         String key = food.getNormalizedName();
@@ -56,6 +58,8 @@ public class Fridge {
      * @param name name of the food item
      * @param amt amount to remove
      * @return true is removal was successful, false otherwise
+     * 
+     * Contributed by: Annika Hambali
      */
     public boolean removeFood(String name, double amt) {
         String key = name.toLowerCase().trim();
@@ -90,6 +94,8 @@ public class Fridge {
      * Returns all food items sorted alphabetically (A-Z).
      * 
      * @return a list of FoodItems sorted by name
+     * 
+     * Contributed by: Annika Hambali
      */
     public List<FoodItem> getAllFoodItemsSortedAZ() {
         List<FoodItem> list = new ArrayList<>(inventoryByName.values());
@@ -101,6 +107,8 @@ public class Fridge {
      * Returns items sorted by expiration date (soonest first).
      * 
      * @return a list of FoodItems sorted by expiration date
+     * 
+     * Contributed by: Annika Hambali
      */
     public List<FoodItem> getAllFoodItemsSortedExpiration() {
         List<FoodItem> list = getAllFoodItemsSortedAZ();
@@ -112,6 +120,8 @@ public class Fridge {
      * Returns all food items that are at or below the low stock threshold.
      * 
      * @return a list of low-stock FoodItems
+     * 
+     * Contributed by: Annika Hambali
      */
     public List<FoodItem> getLowStockItems() {
         List<FoodItem> low = new ArrayList<>();
@@ -126,6 +136,8 @@ public class Fridge {
     
     /**
      * Rebuilds the expiration index to match the current inventory.
+     * 
+     * Contributed by: Annika Hambali
      */
     public void rebuildExpirationIndex() {
         expirationIndex.clear();
@@ -139,6 +151,8 @@ public class Fridge {
      * 
      * @param days the number of days from today
      * @return a list of expiring FoodItems expiring within the window
+     * 
+     * Contributed by: Annika Hambali
      */
     public List<FoodItem> getItemsExpiringWithin(int days) {
         List<FoodItem> soon = new ArrayList<>();
