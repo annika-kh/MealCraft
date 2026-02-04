@@ -1,4 +1,3 @@
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -25,116 +24,148 @@ import java.util.List;
  * Inventory / Shopping List / Recipes.
  */
 public class App extends Application {
-
-    /** Main fridge data model */
+    // Core data
+    /** fridge data model */
     private Fridge fridge;
 
-    /** Current selected FoodItem (Inventory page) */
+    /** selected food item */
     private FoodItem selectedFoodItem;
 
-    /** Current selected Recipe (Recipes page) */
+    /** selected recipe */
     private Recipe selectedRecipe;
 
-    // ---- UI "tabs" ----
+    // Navigation buttons
+    /** inventory tab */
     private Button tabInventory;
+    /** shopping tab */
     private Button tabShopping;
+    /** recipes tab */
     private Button tabRecipes;
 
-    // ---- Page containers ----
+    // Page containers
+    /** main page host */
     private StackPane pageHost;
+    /** inventory page */
     private Pane inventoryPage;
+    /** shopping page */
     private Pane shoppingPage;
+    /** recipes page */
     private Pane recipesPage;
 
-    // ---- Inventory UI pieces ----
+    // Inventory UI components
+    /** inventory grid */
     private GridPane inventoryGrid;
+    /** item details box */
     private VBox itemDetailsBox;
+    /** info box */
     private VBox infoBox;
+    /** inventory sort dropdown */
     private ComboBox<String> inventorySortBox;
 
-    // ---- Recipes UI pieces ----
+    // Recipe UI components
+    /** recipe grid */
     private GridPane recipeGrid;
+    /** recipe book box */
     private VBox recipeBookBox;
+    /** recipe sort mode */
     private RecipeSortMode recipeSortMode = RecipeSortMode.A_Z;
 
-    // ---- Shopping UI pieces ----
+    // Shopping UI components
+    /** shopping list box */
     private VBox shoppingListBox;
 
-    // ---- Simple style constants (CSS -> Java setStyle) ----
+    // UI style constants
+    /** background color */
     private static final String BG = "#9c9c9c";
+    /** panel background color */
     private static final String PANEL_BG = "#d6d6d6";
+    /** border color */
     private static final String BORDER = "#2b2b2b";
+    /** button background color */
     private static final String BTN_BG = "#6e6e6e";
+    /** button border color */
     private static final String BTN_BORDER = "#404040";
+    /** selected tab color */
     private static final String TAB_SELECTED = "#3f3f3f";
+    /** alert color */
     private static final String RED = "#d95b57";
 
+    
     public static void main(String[] args) {
         launch(args);
     }
 
+    /** 
+     * Initializes and displays the main application window.
+     * 
+     * @param stage primary application stage
+     */
     public void start(Stage stage) {
-        Font.loadFont(
-            getClass().getResourceAsStream("/fonts/PixelifySans-Regular.ttf"),
-            12
-        );
+        // Loads custom font
+        Font.loadFont(getClass().getResourceAsStream("/fonts/PixelifySans-Regular.ttf"), 12);
         
-        // ----------------
-        // Build sample data
-        // ----------------
-        fridge = buildDemoFridge(); // replace with your real loading later if you want
-
+        // Builds fridge data
+        fridge = buildFridge();
+        
+        // Main layout
         BorderPane root = new BorderPane();
-        root.setStyle("""
-            -fx-background-color: #bdbdbd;
-            -fx-font-family: 'Pixelify Sans';
-        """);
+        root.setStyle("-fx-background-color: #bdbdbd; -fx-font-family: 'Pixelify Sans';");
 
-        // Top bar: title + tabs
+        // Top bar with title and navigation tabs
         HBox top = buildTopBar();
         root.setTop(top);
 
-        // Pages
+        // Container that holds all the pages
         pageHost = new StackPane();
         pageHost.setPadding(new Insets(10));
         root.setCenter(pageHost);
 
+        // Buils individual pages
         inventoryPage = buildInventoryPage();
         recipesPage = buildRecipesPage();
         shoppingPage = buildShoppingPage();
 
+        // Adds pages to host
         pageHost.getChildren().addAll(inventoryPage, recipesPage, shoppingPage);
 
+        // Shows inventory page by default
         showPage("inventory");
 
+        // Creates and displays scene
         Scene scene = new Scene(root, 1100, 650);
         stage.setTitle("MealCraft");
         stage.setScene(scene);
         stage.show();
 
-        // initial selection defaults
+        // Refreshes UI to sync with initial data
         refreshAll();
     }
 
-    // =========================================================
-    // TOP BAR + TAB HANDLING
-    // =========================================================
-
+    // Top bar and tab handling
+    /**
+     * Builds the top navigation bar containing the title and tab buttons.
+     * 
+     * @return bar configured HBox for the top bar
+     */
     private HBox buildTopBar() {
         HBox bar = new HBox(18);
         bar.setPadding(new Insets(12, 14, 8, 14));
         bar.setAlignment(Pos.CENTER_LEFT);
 
+        // Application title
         Label title = new Label("MealCraft");
         title.setStyle("-fx-font-size: 40px; -fx-font-weight: bold;");
 
+        // Creates tab buttons
         tabInventory = makeTabButton("Inventory");
         tabShopping = makeTabButton("Shopping List");
         tabRecipes = makeTabButton("Recipes");
 
+        // Pushes tabs to the right
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        // Container for tab buttons
         HBox tabs = new HBox(10, tabInventory, tabShopping, tabRecipes);
         tabs.setAlignment(Pos.CENTER);
 
@@ -142,59 +173,80 @@ public class App extends Application {
         return bar;
     }
 
+    /** 
+     * Creates a styled tab button with click behavior.
+     * 
+     * @param text label for the tab
+     * @return b configured Button
+     */
     private Button makeTabButton(String text) {
         Button b = new Button(text);
+        // Applies default styling
         styleTab(b, false);
+        // Switches pages on click
         b.setOnAction(e -> showPage(text));
         return b;
     }
 
+    /**
+     * Displays the selected page and updates tab styles.
+     * 
+     * @param which name of the page to show
+     */
     private void showPage(String which) {
+        // Toggles page visibility
         inventoryPage.setVisible(which.equals("Inventory"));
         recipesPage.setVisible(which.equals("Recipes"));
         shoppingPage.setVisible(which.equals("Shopping List"));
 
+        // Updates tab highlight states
         styleTab(tabInventory, which.equals("Inventory"));
         styleTab(tabRecipes, which.equals("Recipes"));
         styleTab(tabShopping, which.equals("Shopping List"));
 
+        // Refreshes UI after page change
         refreshAll();
     }
 
+    /** 
+     * Applies styling to a tab button based on selection state.
+     * 
+     * @param b tab button
+     * @param selected whether this tab is currently active
+     */
     private void styleTab(Button b, boolean selected) {
-        b.setStyle(
-                "-fx-background-color: " + (selected ? TAB_SELECTED : BTN_BG) + ";" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-padding: 8 18 8 18;" +
-                "-fx-border-color: " + BTN_BORDER + ";" +
-                "-fx-border-width: 2px;"
-        );
+        b.setStyle("-fx-background-color: " + (selected ? TAB_SELECTED : BTN_BG) + ";" + "-fx-text-fill: white;" + "-fx-font-size: 14px;" + "-fx-padding: 8 18 8 18;" + "-fx-border-color: " + BTN_BORDER + ";" + "-fx-border-width: 2px;");
     }
 
-    // =========================================================
-    // INVENTORY PAGE (grid + item details + info)
-    // =========================================================
-
+    // Inventory page
+    /**
+     * Builds the Inventory page layout.
+     * 
+     * @return row inventory page root pane
+     */
     private Pane buildInventoryPage() {
-        
+        // Main horizontal layout
         HBox row = new HBox(22);
         row.setPadding(new Insets(6));
 
-        // Left panel: grid
+        // Inventory grid (left panel)
         VBox leftPanel = panelBox("FOOD STOCK");
+        
+        // Sorting dropdown aligned to the right
         HBox topLine = new HBox();
         topLine.setAlignment(Pos.CENTER_RIGHT);
 
         inventorySortBox = new ComboBox<>();
         inventorySortBox.getItems().addAll("A-Z", "Expiration Date");
+        // Default sort mode
         inventorySortBox.setValue("A-Z");
         inventorySortBox.setPrefWidth(160);
         
+        // Refreshes grid when sort option changes
         inventorySortBox.setOnAction(e -> refreshInventoryGrid());
-
         topLine.getChildren().add(inventorySortBox);
 
+        // Grid that holds food item tiles
         inventoryGrid = new GridPane();
         inventoryGrid.setHgap(8);
         inventoryGrid.setVgap(8);
@@ -202,17 +254,19 @@ public class App extends Application {
 
         Button addItem = new Button("Add Item");
         styleButton(addItem);
+        
+        // Opens dialog to add a new food item
         addItem.setOnAction(e -> addItemDialog((Stage) addItem.getScene().getWindow()));
 
         leftPanel.getChildren().addAll(topLine, inventoryGrid, alignBottom(addItem));
 
-        // Middle panel: item details
+        // Item details (middle panel)
         VBox midPanel = panelBox("ITEM DETAILS");
         itemDetailsBox = new VBox(10);
         itemDetailsBox.setPadding(new Insets(8));
         midPanel.getChildren().add(itemDetailsBox);
 
-        // Right panel: info
+        // Info panel (right panel)
         VBox rightPanel = panelBox("INFO");
         infoBox = new VBox(14);
         infoBox.setPadding(new Insets(8));
@@ -220,7 +274,7 @@ public class App extends Application {
 
         row.getChildren().addAll(leftPanel, midPanel, rightPanel);
 
-        // make panels similar widths
+        // Set consistent widths across panels
         leftPanel.setPrefWidth(350);
         midPanel.setPrefWidth(350);
         rightPanel.setPrefWidth(350);
@@ -228,21 +282,25 @@ public class App extends Application {
         return row;
     }
 
+    /**
+     * Rebuilds the inventory grid UI based on the current sort option.
+     */
     private void refreshInventoryGrid() {
         inventoryGrid.getChildren().clear();
 
-        // Pull items sorted A-Z (your Fridge method)
-        List<FoodItem> items = fridge.getAllFoodItemsSortedAZ();
-
         String sort = inventorySortBox.getValue();
+        List<FoodItem> items;
+
+        // If sorting by expiration
         if (sort != null && sort.equals("Expiration Date")) {
             items = fridge.getAllFoodItemsSortedExpiration();
         } 
+        // Default sorting A-Z
         else {
             items = fridge.getAllFoodItemsSortedAZ();
         }
         
-        // Grid size like mockup (5 columns x 6 rows)
+        // Fixed grid layout
         int cols = 5;
         int maxTiles = 25; // adjust to match your layout
         int tiles = Math.max(maxTiles, items.size());
@@ -250,44 +308,58 @@ public class App extends Application {
         for (int i = 0; i < tiles; i++) {
             StackPane tile = makeTile();
 
+            // If there is an item for this slot
             if (i < items.size()) {
                 FoodItem it = items.get(i);
 
+                // Item image
                 ImageView iv = new ImageView(loadImageSafe(it.getImgFilePath()));
                 iv.setFitWidth(46);
                 iv.setFitHeight(46);
                 iv.setPreserveRatio(true);
 
+                // Quantity label
                 Label qty = new Label(formatQty(it.getQuantity()));
                 qty.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
+                // Overlay badge for quantity
                 StackPane qtyBadge = new StackPane(qty);
                 qtyBadge.setStyle("-fx-background-color: rgba(255,255,255,0.85); -fx-padding: 2 6 2 6;");
                 StackPane.setAlignment(qtyBadge, Pos.TOP_LEFT);
 
                 tile.getChildren().addAll(iv, qtyBadge);
 
+                // Selects the item and refreshes the details
                 tile.setOnMouseClicked(e -> {
                     selectedFoodItem = it;
                     refreshItemDetails();
                 });
-            } else {
+            } 
+            // If no item
+            else {
+                // Renders empty placeholder tile
                 tile.setStyle(tile.getStyle() + "-fx-background-color: #bcbcbc;");
             }
 
+            // Places tile in grid
             inventoryGrid.add(tile, i % cols, i / cols);
         }
     }
 
+    /**
+     * Refreshes the item details panel based on the currently selected food item.
+     */
     private void refreshItemDetails() {
         itemDetailsBox.getChildren().clear();
 
+        // If nothing is selected
         if (selectedFoodItem == null) {
             Label msg = new Label("(Click an item to see details)");
             itemDetailsBox.getChildren().add(msg);
             return;
         }
 
+        // Large preview image
         ImageView big = new ImageView(loadImageSafe(selectedFoodItem.getImgFilePath()));
         big.setFitWidth(90);
         big.setFitHeight(90);
@@ -296,44 +368,58 @@ public class App extends Application {
         Label name = new Label(selectedFoodItem.getName());
         name.setStyle("-fx-font-size: 22px; -fx-font-weight: bold;");
 
+        // Displays item metadata
         Label cat = new Label("CATEGORY: " + selectedFoodItem.getCategory());
         Label qty = new Label("QUANTITY: " + formatQty(selectedFoodItem.getQuantity()));
         Label exp = new Label("EXPIRES: " + selectedFoodItem.getExpirationDate());
 
         Button edit = new Button("edit item");
         styleButton(edit);
+        
+        // Opens edit dialog for selected item
         edit.setOnAction(e -> editItemDialog((Stage) edit.getScene().getWindow(), selectedFoodItem));
 
         itemDetailsBox.getChildren().addAll(big, name, cat, qty, exp, edit);
     }
 
+    /**
+     * Refreshes the info panel.
+     */
     private void refreshInfoPanel() {
+        // Clears previous info entries
         infoBox.getChildren().clear();
 
-        // USE SOON (within 3 days)
+        // Use soon section
         Label useSoon = new Label("USE SOON:");
         useSoon.setStyle("-fx-text-fill: " + RED + "; -fx-font-size: 16px; -fx-font-weight: bold;");
         VBox useSoonList = new VBox(4);
 
         List<FoodItem> soon = fridge.getItemsExpiringWithin(3);
+        
+        // If no items expiring soon
         if (soon.isEmpty()) {
             useSoonList.getChildren().add(new Label("• (none)"));
-        } else {
+        } 
+        else {
+            // Lists each item and days remaining
             for (FoodItem f : soon) {
                 long days = f.daysUntilExpiration(LocalDate.now());
                 useSoonList.getChildren().add(new Label("• " + f.getName().toUpperCase() + " (expires " + days + " day)"));
             }
         }
 
-        // LOW STOCK
+        // Low stock section
         Label low = new Label("LOW STOCK:");
         low.setStyle("-fx-text-fill: " + RED + "; -fx-font-size: 16px; -fx-font-weight: bold;");
         VBox lowList = new VBox(4);
 
         List<FoodItem> lowStock = fridge.getLowStockItems();
+        // If no items are low stock
         if (lowStock.isEmpty()) {
             lowList.getChildren().add(new Label("• (none)"));
-        } else {
+        } 
+        else {
+            // Lists each low stock item and quantity
             for (FoodItem f : lowStock) {
                 lowList.getChildren().add(new Label("• " + f.getName().toUpperCase() + " (x" + formatQty(f.getQuantity()) + ")"));
             }
