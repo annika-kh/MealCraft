@@ -28,16 +28,22 @@ public class Fridge {
     }
 
     /**
-     * Adds food to fridge.
+     * Adds a food item to the fridge inventory.
+     * 
+     * @param food the FoodItem to add
      */
     public void addFood(FoodItem food){
         String key = food.getNormalizedName();
 
+        // If item already exists
         if (inventoryByName.containsKey(key)) {
             FoodItem existing = inventoryByName.get(key);
+            // Merges quantities
             existing.addQuantity(food.getQuantity());
         }
+        // If item is new
         else {
+            // Stores it
             inventoryByName.put(key, food);
         }
         
@@ -45,21 +51,29 @@ public class Fridge {
     }
     
     /**
-     * Removes food if possible.
+     * Removes a specified amount of a food item from the fridge inventory.
+     * 
+     * @param name name of the food item
+     * @param amt amount to remove
+     * @return true is removal was successful, false otherwise
      */
     public boolean removeFood(String name, double amt) {
         String key = name.toLowerCase().trim();
         FoodItem item = inventoryByName.get(key);
         
+        // If item is missing or amount is too large
         if (item == null || amt > item.getQuantity()) {
             return false;
         }
         
+        // If subtraction fails validation
         if (!item.subtractQuantity(amt)) {
             return false;
         }
         
+        // If quantity reaches zero
         if (item.getQuantity() == 0) {
+            // Removes the entry
             inventoryByName.remove(key);
         }
         
@@ -73,7 +87,9 @@ public class Fridge {
     }
     
     /**
-     * Returns items sorted A-Z.
+     * Returns all food items sorted alphabetically (A-Z).
+     * 
+     * @return a list of FoodItems sorted by name
      */
     public List<FoodItem> getAllFoodItemsSortedAZ() {
         List<FoodItem> list = new ArrayList<>(inventoryByName.values());
@@ -83,7 +99,8 @@ public class Fridge {
     
     /**
      * Returns items sorted by expiration date (soonest first).
-     * If expiration dates are equal, items are sorted
+     * 
+     * @return a list of FoodItems sorted by expiration date
      */
     public List<FoodItem> getAllFoodItemsSortedExpiration() {
         List<FoodItem> list = getAllFoodItemsSortedAZ();
@@ -92,11 +109,14 @@ public class Fridge {
     }
     
     /**
-     * Gets low stock items.
+     * Returns all food items that are at or below the low stock threshold.
+     * 
+     * @return a list of low-stock FoodItems
      */
     public List<FoodItem> getLowStockItems() {
         List<FoodItem> low = new ArrayList<>();
         for (FoodItem item : inventoryByName.values()) {
+            // If quantity is low
             if (item.getQuantity() <= LOW_STOCK_THRESHOLD) {
                 low.add(item);
             }
@@ -105,7 +125,7 @@ public class Fridge {
     }
     
     /**
-     * Rebuilds expiration index.
+     * Rebuilds the expiration index to match the current inventory.
      */
     public void rebuildExpirationIndex() {
         expirationIndex.clear();
@@ -115,21 +135,23 @@ public class Fridge {
     }
     
     /**
-     * Returns items expiring within a certain number of days (inclusive).
+     * Returns food items expiring within a certain number of days (inclusive).
      * 
-     * @param days number of days from today
-     * @return list of expiring items
+     * @param days the number of days from today
+     * @return a list of expiring FoodItems expiring within the window
      */
     public List<FoodItem> getItemsExpiringWithin(int days) {
         List<FoodItem> soon = new ArrayList<>();
         LocalDate today = LocalDate.now();
         
+        // If days is negative
         if (days < 0) {
             days = 0;
         }
         
         for (FoodItem item : inventoryByName.values()) {
             long diff = item.daysUntilExpiration(today);
+            // If item expires within the window
             if (diff >= 0 && diff <= days) {
                 soon.add(item);
             }
