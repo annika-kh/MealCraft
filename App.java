@@ -1096,19 +1096,17 @@ public class App extends Application {
         }
     }
 
-
-    // =========================================================
-    // UI HELPERS
-    // =========================================================
-
+    // UI helpers
+    /** 
+     * Creates a styled panel container with a title label.
+     * 
+     * @param title panel title text
+     * @return box styled VBox panel
+     */
     private VBox panelBox(String title) {
         VBox box = new VBox(10);
         box.setPadding(new Insets(14));
-        box.setStyle(
-                "-fx-background-color: " + PANEL_BG + ";" +
-                "-fx-border-color: " + BORDER + ";" +
-                "-fx-border-width: 3px;"
-        );
+        box.setStyle("-fx-background-color: " + PANEL_BG + ";" + "-fx-border-color: " + BORDER + ";" + "-fx-border-width: 3px;");
 
         Label t = new Label(title);
         t.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
@@ -1117,27 +1115,32 @@ public class App extends Application {
         return box;
     }
 
+    /**
+     * Creates a style empty inventory tile.
+     * 
+     * @return tile StackPane tile
+     */
     private StackPane makeTile() {
         StackPane tile = new StackPane();
         tile.setPrefSize(55, 55);
-        tile.setStyle(
-                "-fx-background-color: #ececec;" +
-                "-fx-border-color: " + BORDER + ";" +
-                "-fx-border-width: 2px;"
-        );
+        tile.setStyle("-fx-background-color: #ececec;" + "-fx-border-color: " + BORDER + ";" + "-fx-border-width: 2px;");
         return tile;
     }
 
+    /** Applies the standard button style used throughout the UI.
+     * 
+     * @param b button to style
+     */
     private void styleButton(Button b) {
-        b.setStyle(
-                "-fx-background-color: " + BTN_BG + ";" +
-                "-fx-text-fill: white;" +
-                "-fx-border-color: " + BTN_BORDER + ";" +
-                "-fx-border-width: 2px;" +
-                "-fx-padding: 6 12 6 12;"
-        );
+        b.setStyle("-fx-background-color: " + BTN_BG + ";" + "-fx-text-fill: white;" + "-fx-border-color: " + BTN_BORDER + ";" + "-fx-border-width: 2px;" + "-fx-padding: 6 12 6 12;");
     }
 
+    /**
+     * Wraps a button in a container aligned to the bottom-right
+     * 
+     * @param b button to align
+     * @return wrap Pane wrapper containing the button
+     */
     private Pane alignBottom(Button b) {
         VBox wrap = new VBox();
         wrap.setAlignment(Pos.BOTTOM_RIGHT);
@@ -1145,6 +1148,9 @@ public class App extends Application {
         return wrap;
     }
 
+    /**
+     * Refreshes all UI sections to match the current application state.
+     */
     private void refreshAll() {
         refreshInventoryGrid();
         refreshItemDetails();
@@ -1154,6 +1160,11 @@ public class App extends Application {
         refreshShoppingList();
     }
 
+    /**
+     * Shows a simple information alert dialog.
+     * 
+     * @param msg message to display
+     */
     private void alert(String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setHeaderText(null);
@@ -1161,14 +1172,25 @@ public class App extends Application {
         a.showAndWait();
     }
 
+    /**
+     * Formats a quantity for display
+     * 
+     * @param q quantity value
+     * @return formatted quantity string
+     */
     private String formatQty(double q) {
-        if (Math.abs(q - Math.round(q)) < 1e-9) return String.valueOf((int) Math.round(q));
+        if (Math.abs(q - Math.round(q)) < 1e-9) {
+            return String.valueOf((int) Math.round(q));
+        }
         return String.valueOf(q);
     }
 
+    /** 
+     * Loads an image from a variety of possible locations.
+     * Falls back to a placeholder if nothing can be loaded.
+     */
     private Image loadImageSafe(String pathOrUrl) {
-    
-        // 1) uploaded image (file:/... or http...)
+        // Direct URL or file URI
         if (pathOrUrl != null && !pathOrUrl.isBlank()) {
             try {
                 if (pathOrUrl.startsWith("file:") || pathOrUrl.startsWith("http")) {
@@ -1177,96 +1199,132 @@ public class App extends Application {
             } catch (Exception ignore) {}
         }
     
-        // 2) classpath resource (works if images are in src/main/resources)
+        // Classpath resource
         if (pathOrUrl != null && !pathOrUrl.isBlank()) {
             try {
                 String res = pathOrUrl.startsWith("/") ? pathOrUrl : "/" + pathOrUrl;
                 var url = getClass().getResource(res);
-                if (url != null) return new Image(url.toExternalForm(), true);
+                if (url != null) {
+                    return new Image(url.toExternalForm(), true);
+                }
             } catch (Exception ignore) {}
         }
     
-        // 3) relative disk path (works if images folder is just in your project directory)
+        // Relative disk path
         if (pathOrUrl != null && !pathOrUrl.isBlank()) {
             try {
-                File f = new File(pathOrUrl); // e.g. "fooditem-images/milk.png"
-                if (f.exists()) return new Image(f.toURI().toString(), true);
+                File f = new File(pathOrUrl);
+                if (f.exists()) {
+                    return new Image(f.toURI().toString(), true);
+                }
             } catch (Exception ignore) {}
         }
     
-        // 4) fallback: name + .png (fooditem-images/<name>.png)
+        // Fallback based on normalized name
         if (pathOrUrl != null && !pathOrUrl.isBlank()) {
-            String normalized = pathOrUrl
-                    .toLowerCase()
-                    .replaceAll("[^a-z0-9]+", "");
+            String normalized = pathOrUrl.toLowerCase().replaceAll("[^a-z0-9]+", "");
         
-            Image byName = tryResourceThenDisk(
-                    "/fooditem-images/" + normalized + ".png",
-                    "fooditem-images/" + normalized + ".png"
-            );
-            if (byName != null) return byName;
+            Image byName = tryResourceThenDisk("/fooditem-images/" + normalized + ".png", "fooditem-images/" + normalized + ".png");
+            if (byName != null) {
+                return byName;
+            }
         }
     
-        // 5) mystery fallback
+        // 5) Final fallback placeholder
         Image placeholder = tryResourceThenDisk("placeholder.png", "placeholder.png");
-        if (placeholder != null) return placeholder;
+        if (placeholder != null) {
+            return placeholder;
+        }
     
         return new Image("data:,", true);
     }
     
+    /**
+     * Generates the default image path for a food item name.
+     * 
+     * @param itemName item display name
+     * @return image file path
+     */
     private String imagePathForItemName(String itemName) {
-        if (itemName == null) return "placeholder.png";
+        if (itemName == null) {
+            return "placeholder.png";
+        }
         String normalized = itemName.trim().toLowerCase().replaceAll("\\s+", "");
         return "fooditem-images/" + normalized + ".png";
     }
 
+    /**
+     * Tries to load an image from a classpath resource first, then from disk.
+     * 
+     * @param resPath classpath resource path
+     * @param diskPath disk path
+     * @return Image if found, null otherwise
+     */
     private Image tryResourceThenDisk(String resPath, String diskPath) {
         try {
             var url = getClass().getResource(resPath);
-            if (url != null) return new Image(url.toExternalForm(), true);
+            if (url != null) {
+                return new Image(url.toExternalForm(), true);
+            }
         } catch (Exception ignore) {}
     
         try {
             File f = new File(diskPath);
-            if (f.exists()) return new Image(f.toURI().toString(), true);
+            if (f.exists()) {
+                return new Image(f.toURI().toString(), true);
+            }
         } catch (Exception ignore) {}
     
         return null;
     }
 
+    /**
+     * Sets the Stage from any node currently on a Scene
+     * 
+     * @param anyNodeOnScene a node that is already attached to a Scene
+     * @return Stage, or null if the node is not attached
+     */
     private Stage stageFrom(Pane anyNodeOnScene) {
-        if (anyNodeOnScene == null) return null;
+        if (anyNodeOnScene == null) {
+            return null;
+        }
         return (Stage) anyNodeOnScene.getScene().getWindow();
     }
 
-    // =========================================================
-    // DEMO DATA (replace with your own later)
-    // =========================================================
-
-    private Fridge buildDemoFridge() {
+    /**
+     * Builds a sample fridge.
+     * 
+     * @return f fridge containing inventory, reecipes, and shopping list
+     */
+    private Fridge buildFridge() {
         Fridge f = new Fridge();
 
+        // Inventory names
         f.addFood(new FoodItem("watermelon", 1, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(7), "fooditem-images/watermelon.png"));
         f.addFood(new FoodItem("potato", 1, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(1), "fooditem-images/potato.png"));
         f.addFood(new FoodItem("milk", 1, "cup", Category.DAIRY_EGGS, LocalDate.now().plusDays(2), "fooditem-images/milk.png"));
         f.addFood(new FoodItem("chicken", 1, "x", Category.PROTEINS, LocalDate.now().plusDays(3), "fooditem-images/chicken.png"));
         f.addFood(new FoodItem("tomato", 2, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(8), "fooditem-images/tomato.png"));
 
-        // sample recipe
+        // Recipe ingredients
         List<IngredientLine> ing = new ArrayList<>();
         ing.add(new IngredientLine("potato", 2, "x"));
         ing.add(new IngredientLine("milk", 1, "cup"));
         ing.add(new IngredientLine("chicken", 1, "x"));
 
+        // Recipe steps
         List<String> steps = new ArrayList<>();
         steps.add("Heat oil in a large pot, and brown the chicken");
         steps.add("In the same pot, add potatoes, and cook until soft");
         steps.add("Add water and milk");
         steps.add("Bring to a boil");
 
+        // Recipe
         f.addRecipe(new Recipe("Annika Stew", steps, ing, "fooditem-images/annikastew.png"));
 
+        // Initializes shopping list
         f.createShoppingList();
+        
         return f;
     }
 }
