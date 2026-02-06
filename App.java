@@ -20,8 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * MealCraft UI (JavaFX) - interactive version matching mockups:
- * Inventory / Shopping List / Recipes.
+ * Main UI controlled.
  */
 public class App extends Application {
     // Core data
@@ -435,7 +434,7 @@ public class App extends Application {
      * Contributed by: Jessie Luo
      */
     private enum RecipeSortMode {
-        //Sorting methods:
+        //Sorting methods
         A_Z("A–Z"),
         INGREDIENT_AVAILABILITY("Ingredient availability"),
         USE_SOON("Uses expiring ingredients");
@@ -770,10 +769,7 @@ public class App extends Application {
         }
     }
 
-    // =========================================================
-    // SHOPPING LIST PAGE (paper + removable items + export)
-    // =========================================================
-
+    // Shopping list page
     private Pane buildShoppingPage() {
         HBox row = new HBox();
         row.setPadding(new Insets(6));
@@ -815,11 +811,7 @@ public class App extends Application {
 
     private void refreshShoppingList() {
         shoppingListBox.getChildren().clear();
-
-        // ensure list exists
-        // Add ingredients to recipe function doesnt work if this function runs
-        // fridge.createShoppingList();
-
+        
         List<IngredientLine> lines = new ArrayList<>(fridge.getShoppingListItems());
         lines.sort(Comparator.comparing(IngredientLine::getNormalizedName));
 
@@ -859,10 +851,12 @@ public class App extends Application {
         }
     }
 
-    // =========================================================
-    // DIALOGS (simple BlueJ-friendly)
-    // =========================================================
-
+    // Dialogues
+    /**
+     * Opens a dialog that collects user input and adds a new FoodItem to the fridge.
+     * 
+     * @param stage the parent window used for the file chooser
+     */
     private void addItemDialog(Stage stage) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Add Food Item");
@@ -875,34 +869,43 @@ public class App extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(10));
     
+        // Input fields
         TextField nameField = new TextField();
+        // Default quantity
         TextField qtyField = new TextField("1");
+        // Default unit
         TextField unitField = new TextField("x");
     
+        // Category dropdown
         ComboBox<Category> catBox = new ComboBox<>();
         catBox.getItems().addAll(Category.values());
+        // Default category
         catBox.setValue(Category.OTHER);
     
+        // Expiration date picker
         DatePicker expPicker = new DatePicker(LocalDate.now().plusDays(7));
     
+        // Image path field
         TextField imgField = new TextField();
         imgField.setEditable(false);
     
         Button browse = new Button("Browse...");
         styleButton(browse);
     
+        // File chooser for selecting an image
         browse.setOnAction(e -> {
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Choose Image");
-            chooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg")
-            );
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg"));
             File file = chooser.showOpenDialog(stage);
+            // If a file was selected
             if (file != null) {
-                imgField.setText(file.toURI().toString()); // file:/... url
+                // Stores as file:/ URL
+                imgField.setText(file.toURI().toString()); 
             }
         });
     
+        // Adds form fields to the grid
         grid.add(new Label("Name:"), 0, 0);
         grid.add(nameField, 1, 0);
     
@@ -923,6 +926,7 @@ public class App extends Application {
     
         dialog.getDialogPane().setContent(grid);
     
+        // Handles add button submission
         dialog.showAndWait().ifPresent(result -> {
             if (result == addBtn) {
                 try {
@@ -1053,10 +1057,6 @@ public class App extends Application {
             refreshShoppingList();
         });
     }
-
-    // =========================================================
-    // EXPORT
-    // =========================================================
 
     /**
      * Exports the shopping list to a text file.
@@ -1307,44 +1307,20 @@ public class App extends Application {
         f.addFood(new FoodItem("tomato", 2, "x", Category.FRUITS_VEGETABLES, LocalDate.now().plusDays(8), "fooditem-images/tomato.png"));
 
         // Recipe ingredients
-        List<IngredientLine> ing1 = new ArrayList<>();
-        ing1.add(new IngredientLine("potato", 2, "x"));
-        ing1.add(new IngredientLine("milk", 1, "cup"));
-        ing1.add(new IngredientLine("chicken", 1, "x"));
-        
-        List<IngredientLine> ing2 = new ArrayList<>();
-        ing2.add(new IngredientLine("dough", 1, "pack"));
-        ing2.add(new IngredientLine("cheese", 2, "cup"));
-        ing2.add(new IngredientLine("pepperoni", 10, "pieces"));
-        ing2.add(new IngredientLine("leek", 2, "oz"));
-        
-        List<IngredientLine> ing3 = new ArrayList<>();
-        ing3.add(new IngredientLine("bread", 2, "slices"));
-        ing3.add(new IngredientLine("egg", 1, ""));
-        ing3.add(new IngredientLine("pork", 1, "piece"));
-        ing3.add(new IngredientLine("leek", 2, "oz"));
-        
-        // Recipe steps
-        List<String> steps1 = new ArrayList<>();
-        steps1.add("Heat oil in a large pot, and brown the chicken");
-        steps1.add("In the same pot, add potatoes, and cook until soft");
-        steps1.add("Add water and milk");
-        steps1.add("Bring to a boil");
-        
-        List<String> steps2 = new ArrayList<>();
-        steps2.add("Preheat oven to 450°F-500°F and place a baking sheet");
-        steps2.add("Divide dough into 1 or 2 pieces and roll the dough into a 10-12 inch circle");
-        steps2.add("Place the dough in the oven with desired toppings");
-        steps2.add("Bake for 8-12 minutes");
-        
-        List<String> steps3 = new ArrayList<>();
-        steps3.add("Fry egg and bacon in hot oil until crispy");
-        steps3.add("Toast sourdough with toaster for 5 min");
-        steps3.add("Assemble sandwich and add leek");
+        List<IngredientLine> ing = new ArrayList<>();
+        ing.add(new IngredientLine("potato", 2, "x"));
+        ing.add(new IngredientLine("milk", 1, "cup"));
+        ing.add(new IngredientLine("chicken", 1, "x"));
 
-        f.addRecipe(new Recipe("Annika Stew", steps1, ing1, "fooditem-images/annikastew.png"));
-        f.addRecipe(new Recipe("Jessie Pizza", steps2, ing2, "fooditem-images/pizza.png"));
-        f.addRecipe(new Recipe("Angela Sandwich", steps3, ing3, "fooditem-images/sandwich.png"));
+        // Recipe steps
+        List<String> steps = new ArrayList<>();
+        steps.add("Heat oil in a large pot, and brown the chicken");
+        steps.add("In the same pot, add potatoes, and cook until soft");
+        steps.add("Add water and milk");
+        steps.add("Bring to a boil");
+
+        // Recipe
+        f.addRecipe(new Recipe("Annika Stew", steps, ing, "fooditem-images/annikastew.png"));
 
         // Initializes shopping list
         f.createShoppingList();
