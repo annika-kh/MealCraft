@@ -20,7 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Main UI controlled.
+ * Main UI controller.
  */
 public class App extends Application {
     // Core data
@@ -222,6 +222,8 @@ public class App extends Application {
      * Builds the Inventory page layout.
      * 
      * @return row inventory page root pane
+     * 
+     * Contributed by: Annika Hambali
      */
     private Pane buildInventoryPage() {
         // Main horizontal layout
@@ -283,6 +285,8 @@ public class App extends Application {
 
     /**
      * Rebuilds the inventory grid UI based on the current sort option.
+     * 
+     * Contributed by: Annika Hambali
      */
     private void refreshInventoryGrid() {
         inventoryGrid.getChildren().clear();
@@ -347,6 +351,8 @@ public class App extends Application {
 
     /**
      * Refreshes the item details panel based on the currently selected food item.
+     * 
+     * Contributed by: Annika Hambali
      */
     private void refreshItemDetails() {
         itemDetailsBox.getChildren().clear();
@@ -383,6 +389,8 @@ public class App extends Application {
 
     /**
      * Refreshes the info panel.
+     * 
+     * Contributed by: Annika Hambali
      */
     private void refreshInfoPanel() {
         // Clears previous info entries
