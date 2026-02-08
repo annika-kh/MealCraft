@@ -88,7 +88,6 @@ public class App extends Application {
     /** alert color */
     private static final String RED = "#d95b57";
 
-    
     public static void main(String[] args) {
         launch(args);
     }
@@ -127,7 +126,7 @@ public class App extends Application {
         pageHost.getChildren().addAll(inventoryPage, recipesPage, shoppingPage);
 
         // Shows inventory page by default
-        showPage("inventory");
+        showPage("Inventory");
 
         // Creates and displays scene
         Scene scene = new Scene(root, 1100, 650);
