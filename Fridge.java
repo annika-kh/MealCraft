@@ -7,7 +7,7 @@ import java.util.*;
  */
 public class Fridge {
     /** low stock threshold */
-    private static final double LOW_STOCK_THRESHOLD = 1;
+    private static final double LOW_STOCK_THRESHOLD = 2;
     /** food inventory */
     private HashMap<String, FoodItem> inventoryByName;
     /** expiration index */
