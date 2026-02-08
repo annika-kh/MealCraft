@@ -179,6 +179,8 @@ public class Fridge {
      * Adds a recipe to the fridge's stored recipe list.
      * 
      * @param recipe recipe to add
+     * 
+     * Contributed by: Jessie Luo
      */
     public void addRecipe(Recipe recipe) {
         if (recipe != null) {
@@ -197,6 +199,8 @@ public class Fridge {
     
     /**
      * Builds shopping list.
+     * 
+     * Contributed by: Angela Zhong
      */
     public void createShoppingList() {
         shoppingList.clear();
@@ -212,6 +216,8 @@ public class Fridge {
     
     /**
      * Removes amount from shopping list.
+     * 
+     * Contributed by: Angela Zhong
      */
     public void removeShoppingListItem(String name, double amt) {
         name = name.toLowerCase().trim();
@@ -240,20 +246,24 @@ public class Fridge {
     /**
      * Adds a specific amount of an ingredient to the shopping list.
      * If it already exists, it increases the amount.
+     * 
+     * Contributed by: Angela Zhong
      */
     public void addShoppingListItem(String name, double amt, String unit) {
-        if (name == null || name.isBlank()) return;
+        if (name == null || name.isBlank()) {
+            return;
+        }
     
         String key = name.toLowerCase().trim().replaceAll("\\s+", "");
-        if (unit == null || unit.isBlank()) unit = "";
+        if (unit == null || unit.isBlank()) {
+            unit = "";
+        }
     
         IngredientLine existing = shoppingList.get(key);
         if (existing == null) {
             shoppingList.put(key, new IngredientLine(name, amt, unit));
         } else {
-            shoppingList.put(
-                key,
-                new IngredientLine(existing.getNormalizedName(), existing.getAmount() + amt, existing.getUnit())
+            shoppingList.put(key, new IngredientLine(existing.getNormalizedName(), existing.getAmount() + amt, existing.getUnit())
             );
         }
     }
@@ -263,7 +273,7 @@ public class Fridge {
      * 
      * @return Recipe
      * 
-     * Contributed by: Jessie
+     * Contributed by: Jessie Luo
      */
     public Recipe getRecipeWithIngredients(){
         double max = 0;
