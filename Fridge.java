@@ -263,8 +263,7 @@ public class Fridge {
         if (existing == null) {
             shoppingList.put(key, new IngredientLine(name, amt, unit));
         } else {
-            shoppingList.put(key, new IngredientLine(existing.getNormalizedName(), existing.getAmount() + amt, existing.getUnit())
-            );
+            shoppingList.put(key, new IngredientLine(existing.getNormalizedName(), existing.getAmount() + amt, existing.getUnit()));
         }
     }
 
