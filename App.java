@@ -847,33 +847,32 @@ public class App extends Application {
      * Opens a dialog that collects user input and adds a new FoodItem to the fridge.
      * 
      * @param stage the parent window used for the file chooser
+     * 
+     * Contributed by: Annika Hambali
      */
     private void addItemDialog(Stage stage) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Add Food Item");
     
+        // Dialog buttons
         ButtonType addBtn = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addBtn, ButtonType.CANCEL);
     
+        // Layout for input fields
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(10));
     
-        // Input fields
+        // User input fields
         TextField nameField = new TextField();
-        // Default quantity
-        TextField qtyField = new TextField("1");
-        // Default unit
-        TextField unitField = new TextField("x");
+        TextField qtyField = new TextField("1");        // Default quantity
+        TextField unitField = new TextField("x");       // Default unit
     
-        // Category dropdown
         ComboBox<Category> catBox = new ComboBox<>();
         catBox.getItems().addAll(Category.values());
-        // Default category
-        catBox.setValue(Category.OTHER);
+        catBox.setValue(Category.OTHER);                // Default category
     
-        // Expiration date picker
         DatePicker expPicker = new DatePicker(LocalDate.now().plusDays(7));
     
         // Image path field
@@ -883,20 +882,19 @@ public class App extends Application {
         Button browse = new Button("Browse...");
         styleButton(browse);
     
-        // File chooser for selecting an image
+        // Opens file chooser to select image
         browse.setOnAction(e -> {
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Choose Image");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg"));
             File file = chooser.showOpenDialog(stage);
-            // If a file was selected
             if (file != null) {
                 // Stores as file:/ URL
                 imgField.setText(file.toURI().toString()); 
             }
         });
     
-        // Adds form fields to the grid
+        // Adds fields to grid
         grid.add(new Label("Name:"), 0, 0);
         grid.add(nameField, 1, 0);
     
@@ -917,10 +915,11 @@ public class App extends Application {
     
         dialog.getDialogPane().setContent(grid);
     
-        // Handles add button submission
+        // Handles submission
         dialog.showAndWait().ifPresent(result -> {
             if (result == addBtn) {
                 try {
+                    // Reads user input
                     String name = nameField.getText().trim();
                     double qty = Double.parseDouble(qtyField.getText().trim());
                     String unit = unitField.getText().trim();
@@ -928,16 +927,23 @@ public class App extends Application {
                     LocalDate exp = expPicker.getValue();
                     String img = imgField.getText().trim();
                     
-                    // If they didn't pick an image, store empty string and loader will use placeholder
+                    // Assigns default image if none chosen
                     if (img.isBlank()) {
-                        img = imagePathForItemName(name);  // <--name+png
+                        img = imagePathForItemName(name);
                     }
     
-                    if (exp == null) exp = LocalDate.now().plusDays(7);
-                    if (cat == null) cat = Category.OTHER;
+                    // Defaults
+                    if (exp == null) {
+                        exp = LocalDate.now().plusDays(7);
+                    }
+                    if (cat == null) {
+                        cat = Category.OTHER;
+                    }
     
+                    // Adds item to fridge
                     fridge.addFood(new FoodItem(name, qty, unit, cat, exp, img));
     
+                    // Updates UI
                     refreshAll();
     
                 } catch (Exception ex) {
@@ -947,11 +953,18 @@ public class App extends Application {
         });
     }
 
+    /**
+     * Opens a dialog that allows the user to edit an existing FoodItem.
+     * If the quantity is set to 0, the item is removed from the fridge.
+     * 
+     * @param stage the parent window used for the file chooser
+     * @param item the FoodItem to edit
+     */
     private void editItemDialog(Stage stage, FoodItem item) {
         if (item == null) {
             alert("No item selected.");
-        } else {
-    
+        } 
+        else {
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setTitle("Edit Item");
     
@@ -979,6 +992,7 @@ public class App extends Application {
             Button browse = new Button("Browse...");
             styleButton(browse);
     
+            // Allows user to choose a new image
             browse.setOnAction(e -> {
                 FileChooser chooser = new FileChooser();
                 chooser.setTitle("Choose Image");
@@ -991,6 +1005,7 @@ public class App extends Application {
                 }
             });
     
+            // Layout fields
             grid.add(new Label("Item:"), 0, 0);
             grid.add(nameLabel, 1, 0);
     
@@ -1008,6 +1023,7 @@ public class App extends Application {
     
             dialog.getDialogPane().setContent(grid);
     
+            // Handles save action
             dialog.showAndWait().ifPresent(result -> {
                 if (result == saveBtn) {
                     try {
@@ -1016,19 +1032,33 @@ public class App extends Application {
                         LocalDate newExp = expPicker.getValue();
                         String newImg = imgField.getText().trim();
     
-                        // Use your "setQuantity using add/subtract"
-                        item.setQuantity(newQty);
+                        // If quantityis zero
+                        if (newQty == 0) {
+                            // Removes item from fridge
+                            fridge.removeFood(item.getName(), item.getQuantity());
+                            // Prevents dangling UI reference
+                            selectedFoodItem = null;
+                        }
+                        else {
+                            // Updates quantity directly
+                            item.setQuantity(newQty);
+                        }
     
-                        if (newCat != null) item.setCategory(newCat);
-                        if (newExp != null) item.setExpirationDate(newExp);
+                        // Applies category and expiration updates
+                        if (newCat != null) {
+                            item.setCategory(newCat);
+                        }
+                        if (newExp != null) {
+                            item.setExpirationDate(newExp);
+                        }
     
-                        // Only if you have setter; if not, skip this line
-                        // item.setImgFilePath(newImg);
-    
-                        fridge.rebuildExpirationIndex(); // expiration changed
+                        // Rebuilds expiration index
+                        fridge.rebuildExpirationIndex();
+                        
+                        // Refreshes UI
                         refreshAll();
-    
-                    } catch (Exception ex) {
+                    } 
+                    catch (Exception ex) {
                         alert("Invalid input. Quantity must be a number.");
                     }
                 }
@@ -1036,21 +1066,26 @@ public class App extends Application {
         }
     }
 
+    /**
+     * 
+     * 
+     * Contributed by: Angela Zhong
+     */
     private void addShoppingItemDialog() {
         TextInputDialog d = new TextInputDialog("ex. milk");
         d.setTitle("Add Shopping Item");
         d.setHeaderText("Enter item name to add:");
         d.setContentText("Name:");
         d.showAndWait().ifPresent(name -> {
-            // easiest: add 1 unit in shopping list by regenerating then manually adjusting
             fridge.addShoppingListItem(name, 1, "");
-            // You can add a dedicated "addShoppingListItem" method later if you want.
             refreshShoppingList();
         });
     }
 
     /**
      * Exports the shopping list to a text file.
+     * 
+     * Contributed by: Angela Zhong
      */
     private void exportShoppingList(Stage stage) {
         if (stage != null) {
