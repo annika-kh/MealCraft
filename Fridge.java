@@ -187,19 +187,6 @@ public class Fridge {
     }
     
     /**
-     * Returns cookable recipes.
-     */
-    public List<Recipe> getCookableRecipes() {
-        List<Recipe> list = new ArrayList<>();
-        for (Recipe recipe : recipes) {
-            if (recipe.canCook(this)) {
-                list.add(recipe);
-            }
-        }
-        return list;
-    }
-    
-    /**
      * Returns the stored recipe list.
      * 
      * @return recipes
