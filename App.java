@@ -11,7 +11,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.text.Font;
 import java.util.Optional;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.time.LocalDate;
@@ -67,7 +66,7 @@ public class App extends Application {
     /** recipe book box */
     private VBox recipeBookBox;
     /** recipe sort mode */
-    private RecipeSortMode recipeSortMode = RecipeSortMode.A_Z;
+    private ComboBox<String> recipeSortBox;
 
     // Shopping UI components
     /** shopping list box */
@@ -437,27 +436,11 @@ public class App extends Application {
 
     // Recipes Page
     /**
-     * Holds the sorting options of Recipe
+     * Builds the page layout for the Recipe page with a grid of recipes and a description
      * 
      * Contributed by: Jessie Luo
      */
-    private enum RecipeSortMode {
-        //Sorting methods
-        A_Z("A–Z"),
-        INGREDIENT_AVAILABILITY("Ingredient availability"),
-        USE_SOON("Uses expiring ingredients");
-
-        private final String label;
-        RecipeSortMode(String label) {
-            this.label = label;
-        }
-        @Override
-        public String toString() {
-            return label;
-        }
-    } 
-    
-    /**
+        /**
      * Builds the page layout for the Recipe page with a grid of recipes and a description
      * 
      * Contributed by: Jessie Luo
@@ -470,28 +453,26 @@ public class App extends Application {
         HBox topLine = new HBox();
         topLine.setAlignment(Pos.CENTER_RIGHT);
 
-        ComboBox<RecipeSortMode> sortDropdown = new ComboBox<>();
-        sortDropdown.getItems().addAll(RecipeSortMode.values());
-        sortDropdown.setValue(recipeSortMode);
-        sortDropdown.setPrefWidth(220);
-
-        sortDropdown.setOnAction(e -> {
-            recipeSortMode = sortDropdown.getValue();
-            refreshRecipeGrid();
-        });
-
-        topLine.getChildren().add(sortDropdown);
+        //recipe sort dropdown menu
+        recipeSortBox = new ComboBox<>();
+        recipeSortBox.getItems().addAll("A-Z","Ingredient availability","Uses expiring ingredients");
+        recipeSortBox.setValue("A-Z");
+        recipeSortBox.setPrefWidth(220);
+        recipeSortBox.setOnAction(e -> refreshRecipeGrid());
+        topLine.getChildren().add(recipeSortBox);
         recipeGrid = new GridPane();
         recipeGrid.setHgap(8);
         recipeGrid.setVgap(8);
         recipeGrid.setPadding(new Insets(10, 0, 10, 0));
 
+        //add recipe button
         Button addRecipe = new Button("add recipe");
         styleButton(addRecipe);
         addRecipe.setOnAction(e -> addRecipeDialog());
         leftPanel.getChildren().addAll(topLine, recipeGrid, alignBottom(addRecipe));
         leftPanel.setPrefWidth(350);
 
+        //recipe description gui
         recipeBookBox = new VBox(10);
         recipeBookBox.setPadding(new Insets(12));
         recipeBookBox.setStyle(
@@ -513,15 +494,20 @@ public class App extends Application {
      * 
      * Contributed by: Jessie Luo
      */
-    private void refreshRecipeGrid() {
+     private void refreshRecipeGrid() {
         recipeGrid.getChildren().clear();
         List<Recipe> recipes = new ArrayList<>(fridge.getRecipes());
         
         //checks if sort mode changes
-        switch (recipeSortMode) {
-            case A_Z -> sortRecipesAZ(recipes);
-            case INGREDIENT_AVAILABILITY -> sortByIngredientAvailability(recipes);
-            case USE_SOON -> sortByExpiringIngredients(recipes);
+        String sort = recipeSortBox.getValue();
+        if (sort == null || sort.equals("A-Z")) {
+            sortRecipesAZ(recipes);
+        }
+        else if (sort.equals("Ingredient availability")) {
+            sortByIngredientAvailability(recipes);
+        }
+        else if (sort.equals("Uses expiring ingredients")) {
+            sortByExpiringIngredients(recipes);
         }
 
         int cols = 5;
@@ -533,12 +519,10 @@ public class App extends Application {
             StackPane tile = makeTile();
             if (i < recipes.size()) {
                 Recipe r = recipes.get(i);
-
                 ImageView iv = new ImageView(loadImageSafe(r.getImgFilePath()));
                 iv.setFitWidth(46);
                 iv.setFitHeight(46);
                 iv.setPreserveRatio(true);
-
                 tile.getChildren().add(iv);
                 tile.setOnMouseClicked(e -> {
                     selectedRecipe = r;
